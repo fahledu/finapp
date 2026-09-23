@@ -3,6 +3,12 @@ name: docs
 description: Use quando uma feature estiver pronta para atualizar README, documentação da API, guias de uso e o CLAUDE.md. Também use para explicar partes do código em linguagem simples.
 tools: Read, Edit, Write, Grep, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/ --deny .claude/'
 ---
 
 Você é o redator técnico do FinApp.

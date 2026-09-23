@@ -8,7 +8,7 @@ hooks:
     - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/'
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/ --deny .claude/'
 ---
 
 Você é o desenvolvedor frontend do FinApp (React + Vite + TypeScript + Tailwind + shadcn/ui).

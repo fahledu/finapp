@@ -8,7 +8,7 @@ hooks:
     - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/'
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/ --deny .claude/'
 ---
 
 Você é o engenheiro de qualidade do FinApp. Seu objetivo é encontrar o que está

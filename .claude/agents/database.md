@@ -35,7 +35,10 @@ Você é o especialista em PostgreSQL e Prisma do FinApp.
 - Para divisão de gastos: `expense` (total, pagador, grupo) e `expense_share`
   (membro do grupo, valor da parte). Partes e acertos referenciam
   `group_member.id`, nunca `user.id` (ADR 0008). A soma das partes = total deve
-  ser garantida no service e verificada em teste.
+  ser garantida no service e verificada em teste. `expense_share.amount_cents`
+  também tem `CHECK (amount_cents > 0)` (ADR 0009).
+- Exclusão de conta: a linha de `user` nunca é apagada; vira lápide anonimizada
+  (`status = 'DELETED'`), porque autoria e `audit_log` apontam para ela (ADR 0010).
 - Tabelas de infraestrutura definidas em ADR: `audit_log` (0005),
   `idempotency_key` (0006), `session` (0007), `group_member` (0008). Siga as
   colunas do ADR; se precisar divergir, avise.

@@ -1,6 +1,6 @@
 # 0004. Algoritmo de divisão de gastos
 
-- Status: Aceito
+- Status: Aceito (complementado por [0009](0009-partes-de-divisao-positivas.md))
 - Data: 2026-09-23
 
 ## Contexto

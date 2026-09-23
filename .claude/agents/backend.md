@@ -41,7 +41,8 @@ apps/api/src/modules/<modulo>/
 - Divisão de gastos (ADR 0004): implemente **só os modos pedidos no plano**; a
   ordem prevista é igual → valor exato → porcentagem → cotas. O algoritmo é a
   função pura de `packages/shared/src/split.ts`; sobra de centavos pelo maior
-  resto, desempate pelo id do membro do grupo em ordem crescente.
+  resto, desempate pelo id do membro do grupo em ordem crescente. Parte zero
+  → `422 SPLIT_SHARE_ZERO`, validada antes de gravar (ADR 0009).
 - Soft delete e auditoria (ADR 0005): use o client Prisma com a extensão de soft
   delete; grave o `audit_log` na mesma `$transaction` da alteração.
 - Moedas (ADR 0003): moeda diferente da conta/grupo/ativo → `CURRENCY_MISMATCH`.
@@ -50,7 +51,12 @@ apps/api/src/modules/<modulo>/
 - Suporte a `Idempotency-Key` nas rotas de criação de transação, despesa e acerto,
   pelo plugin reutilizável descrito no ADR 0006 (não reimplemente por rota).
 - Erros: lance os erros de `common/errors.ts` (`NotFoundError`, `ForbiddenError`,
-  `ValidationError`...). Nunca vaze stack trace ou mensagem do Prisma para o cliente.
+  `ValidationError`...), com os status definidos no CLAUDE.md (validação `422`,
+  recurso de outro usuário `404`). Configure o error handler global para que
+  erros de validação do Fastify/Zod também saiam como `422 VALIDATION_ERROR`
+  (o padrão do Fastify é `400`). Nunca vaze stack trace ou mensagem do Prisma.
+- Variáveis de ambiente: schema Zod em `src/config/env.ts`, validado na
+  inicialização (falha cedo). O agente devops mantém o `.env.example` em sincronia.
 - Log com o logger do Fastify (pino). Nunca logue senha, token ou dado bancário.
 - Integrações externas (cotações): isolar num client em `src/integrations/`, com
   timeout, retry e cache; rodar via job BullMQ, não na requisição do usuário.

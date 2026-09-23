@@ -31,6 +31,8 @@ quebrado, não confirmar que está tudo certo.
 - R$ 100,00 dividido por 3 → partes somam exatamente 10000 centavos
 - Valores de 1 centavo, valores muito grandes, valor zero (deve falhar)
 - Porcentagens (pontos-base) que não somam 10000 → `422 SPLIT_PERCENTAGE_INVALID`
+- Parte zero → `422 SPLIT_SHARE_ZERO`: R$ 0,02 entre 3 rejeita; R$ 0,03 entre 3
+  dá 1 + 1 + 1 (ADR 0009)
 - Moeda diferente da conta/grupo → `422 CURRENCY_MISMATCH` (ADR 0003)
 - Despesa editada ou excluída recalcula os saldos
 - Mesma `Idempotency-Key`: repetição não duplica; corpo diferente → `422`;

@@ -18,7 +18,8 @@ financeiros e pessoais, então está sujeito à LGPD e é alvo atraente.
 
 **Autenticação e sessão**
 - Senhas com argon2id; nunca logadas nem retornadas
-- Cookie de sessão `httpOnly`, `secure`, `sameSite=lax` ou `strict`
+- Cookie de sessão conforme ADR 0007: `httpOnly`, `sameSite=lax`, `path=/`; em
+  produção `secure` e nome `__Host-sid`. Token guardado só como SHA-256
 - Rotação de sessão no login; invalidação no logout e troca de senha
 - Rate limit em login, cadastro e recuperação de senha
 - Proteção CSRF nas mutações
@@ -26,14 +27,20 @@ financeiros e pessoais, então está sujeito à LGPD e é alvo atraente.
 **Autorização**
 - Toda rota verifica o dono do recurso ou membresia no grupo (procure IDOR:
   trocar um id na URL dá acesso a dado alheio?)
-- Usuário removido de grupo perde acesso às despesas futuras
+- Membro que saiu ou foi removido (`LEFT`) perde acesso a **todo** o grupo,
+  inclusive histórico; membro sem conta não acessa nada (ADR 0008)
+- Recurso de outro usuário responde `404`, não `403`, para não revelar que o id existe
 
 **Entrada e saída**
 - Toda entrada validada por Zod; sem SQL cru concatenado (`$queryRawUnsafe`)
 - Sem `dangerouslySetInnerHTML` com dado do usuário
 - Importação de extratos (CSV/OFX): limite de tamanho, validação de tipo, sem
   execução de conteúdo
-- Headers de segurança via `@fastify/helmet`; CORS restrito à origem do web
+- Headers de segurança via `@fastify/helmet`
+- Sem CORS: web e API ficam na mesma origem (proxy do Vite em dev, mesma origem em
+  produção, ADR 0007). Se aparecer `@fastify/cors`, `Access-Control-Allow-Credentials`
+  ou `origin: true`/`*`, é achado. Mutações checam `Origin` contra `WEB_ORIGIN` e
+  exigem `Content-Type: application/json`
 
 **Dados e segredos**
 - Segredos só em variáveis de ambiente, nunca commitados; `.env` no `.gitignore`

@@ -16,16 +16,21 @@ de produção.
 ## Stack
 
 - **Monorepo:** pnpm workspaces + Turborepo
-- **Backend (`apps/api`):** Node 20+, TypeScript (strict), Fastify, Zod, Prisma, PostgreSQL 16
-- **Frontend (`apps/web`):** React 18, Vite, TypeScript, TanStack Query, React Router,
-  React Hook Form + Zod, Tailwind CSS + shadcn/ui, Recharts
+- **Versões fixadas no ADR 0011.** Instale sempre com o major explícito
+  (`pnpm add prisma@7`); nunca pré-release nem `latest` às cegas.
+- **Runtime:** Node 24 LTS (`.nvmrc`), pnpm 12 via corepack
+- **Backend (`apps/api`):** TypeScript 6 (strict), Fastify 5, Zod 4, Prisma 7
+  (`@prisma/adapter-pg`), PostgreSQL 18
+- **Frontend (`apps/web`):** React 19, Vite 8, TanStack Query 5, React Router 8 (SPA),
+  React Hook Form 7 + Zod 4, Tailwind CSS 4 + shadcn/ui, Recharts 3
 - **Compartilhado (`packages/shared`):** schemas Zod, tipos e utilitários de dinheiro
   usados por API e web (fonte única de verdade dos contratos)
-- **Auth:** sessão guardada no Postgres, token em cookie httpOnly, senha com argon2id (ADR 0007)
-- **Jobs:** BullMQ + Redis (atualização de cotações, recorrências)
-- **Testes:** Vitest, Supertest, Testcontainers (Postgres real), Playwright (e2e),
+- **Auth:** sessão guardada no Postgres, token em cookie httpOnly, senha com argon2id via `@node-rs/argon2` (ADR 0007)
+- **Jobs:** BullMQ 6 + Redis 8 (atualização de cotações, recorrências)
+- **Testes:** Vitest 5, Supertest, Testcontainers (Postgres real), Playwright (e2e),
   fast-check (testes de propriedade para `money.ts` e divisão)
-- **Infra local:** Docker Compose (Postgres + Redis)
+- **Lint:** ESLint 10 + typescript-eslint (flat config)
+- **Infra local:** Docker Compose (`postgres:18-alpine` + `redis:8-alpine`)
 
 ## Estrutura
 
@@ -75,6 +80,8 @@ ou por nome: `pnpm -F api test -- -t "maior resto"`.
 ## Regras de domínio (NÃO NEGOCIÁVEIS)
 
 Detalhes e justificativas em `docs/adr/`. Leia o ADR citado antes de mexer na área.
+ADRs com status **Proposto** ainda não são regra: o architect os considera no
+plano e pede decisão antes de implementar.
 
 1. **Dinheiro nunca é float.** Valores são inteiros em centavos, sempre positivos,
    acompanhados do código de moeda ISO 4217 (`BRL`, `USD`): `BIGINT` no banco,
@@ -89,7 +96,8 @@ Detalhes e justificativas em `docs/adr/`. Leia o ADR citado antes de mexer na á
 3. **Divisão de gastos:** a soma das partes deve ser exatamente igual ao total.
    Centavos que sobram vão pelo maior resto; empate decidido pelo id do membro do
    grupo em ordem crescente, então o resultado não depende da ordem de entrada.
-   Existe teste para isso; não quebre. (ADR 0004)
+   Nenhuma parte pode ser zero: rejeite com `422 SPLIT_SHARE_ZERO`.
+   Existe teste para isso; não quebre. (ADRs 0004 e 0009)
 4. **Datas:** instantes em `timestamptz` (UTC), ISO 8601 no JSON. Data de
    competência é `DATE` e trafega como string `"YYYY-MM-DD"`, nunca como `Date`
    fora do repository. "Hoje" é calculado em `America/Sao_Paulo`. (ADR 0002)
@@ -113,6 +121,10 @@ Detalhes e justificativas em `docs/adr/`. Leia o ADR citado antes de mexer na á
 - Camadas no backend: `routes` (HTTP) → `service` (regra de negócio) → `repository` (Prisma).
   Regra de negócio nunca fica na rota.
 - Erros no formato `{ error: { code, message, details? } }` (ver `apps/api/src/common/errors.ts`).
+  Status: entrada inválida (Zod) → `422 VALIDATION_ERROR`; JSON malformado → `400`;
+  sem sessão → `401`; recurso inexistente **ou de outro usuário** → `404`; sem
+  permissão num recurso visível (ex.: membro não-OWNER) → `403`; conflito de
+  estado → `409`. O handler global converte os erros do Fastify para esse formato.
 - Frontend: dados do servidor via TanStack Query; estado local com `useState`. Sem Redux.
 - Formatação de moeda e datas sempre com `Intl` em `pt-BR`.
 - Commits no padrão Conventional Commits (`feat:`, `fix:`, `chore:`...).

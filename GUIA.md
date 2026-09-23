@@ -112,13 +112,14 @@ Faça um item por vez, com commit ao final de cada um.
 
 ### Primeira sessão: criar o projeto
 
-Pré-requisitos: Node 20+ (LTS), pnpm (`corepack enable`) e Docker Desktop.
+Pré-requisitos: Node 24 LTS, pnpm (`corepack enable`) e Docker Desktop. Versões
+de todas as bibliotecas: ADR 0011 (instale sempre com o major explícito).
 
 ```
 Leia o CLAUDE.md e os ADRs em docs/adr/. Vamos criar o esqueleto do projeto do zero.
 
 Use o agente devops para: estrutura do monorepo com pnpm workspaces e Turborepo,
-docker-compose com Postgres 16 e Redis, .env.example e workflow de CI básico
+docker-compose com Postgres 18 e Redis 8, .env.example e workflow de CI básico
 (testes de integração com Testcontainers, matriz de fuso UTC e America/Sao_Paulo).
 Os scripts devem ter os nomes da seção "Comandos" do CLAUDE.md.
 

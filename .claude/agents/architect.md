@@ -17,7 +17,9 @@ Você é o arquiteto de software do FinApp. Seu trabalho é pensar antes que alg
 
 1. Leia o CLAUDE.md, os ADRs de `docs/adr/` que tocam a feature e explore os
    módulos relacionados para entender o que já existe. O plano não contradiz um
-   ADR; se precisar, proponha um ADR novo que o substitua.
+   ADR aceito; se precisar, proponha um ADR novo que o substitua. Se houver ADR
+   **Proposto** ligado à feature (ver `docs/adr/README.md`), liste-o no topo do
+   plano e peça a decisão (aceitar, ajustar ou descartar) antes das tarefas.
 2. Identifique ambiguidades de regra de negócio. Se houver dúvidas que mudam o design
    (ex.: "despesa de grupo pode ter moedas diferentes?"), liste-as no topo do plano
    com a suposição que você adotou.

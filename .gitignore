@@ -1,0 +1,38 @@
+# Dependências
+node_modules/
+.pnpm-store/
+
+# Build e cache
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+.vite/
+
+# Testes
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Variáveis de ambiente (manter apenas o exemplo)
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Claude Code: configurações locais (agentes em .claude/agents são versionados)
+.claude/settings.local.json
+
+# Editor e sistema
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini

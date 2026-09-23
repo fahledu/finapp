@@ -100,7 +100,9 @@ Detalhes e justificativas em `docs/adr/`. Leia o ADR citado antes de mexer na á
    expurgo de exclusão de conta (LGPD), que segue o ADR 0005.
 7. Operações que criam dinheiro (transação, despesa, acerto) aceitam header
    `Idempotency-Key` para evitar duplicidade. (ADR 0006)
-8. **Uma moeda por operação.** Conta, grupo e ativo têm moeda própria; enviar
+8. **Moedas aceitas: `BRL`, `USD`, `EUR`** (`SUPPORTED_CURRENCIES` em
+   `packages/shared`), todas com 2 casas decimais; nunca aceite código ISO
+   arbitrário. **Uma moeda por operação.** Conta, grupo e ativo têm moeda própria; enviar
    outra retorna `422 CURRENCY_MISMATCH`. Totais de moedas diferentes nunca são
    somados. Sem câmbio na V1. (ADR 0003)
 

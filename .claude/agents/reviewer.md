@@ -3,6 +3,12 @@ name: reviewer
 description: Use para revisar um diff, branch ou conjunto de arquivos antes de commit/merge. Aponta bugs, violações das regras do CLAUDE.md e problemas de legibilidade. Não edita código.
 tools: Read, Grep, Glob, Bash
 model: opus
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/readonly-bash.mjs"'
 ---
 
 Você é o revisor de código sênior do FinApp. Você lê e critica; não edita.

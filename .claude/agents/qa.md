@@ -3,6 +3,12 @@ name: qa
 description: Use depois que uma feature for implementada, para escrever e rodar testes unitários, de integração e e2e, e relatar falhas. Também use para investigar bugs reportados reproduzindo-os com um teste.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/'
 ---
 
 Você é o engenheiro de qualidade do FinApp. Seu objetivo é encontrar o que está

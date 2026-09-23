@@ -132,6 +132,11 @@ Para features novas, seguir esta ordem:
 
 Infra, Docker e CI ficam com `devops`.
 
+As áreas de cada agente são garantidas por hooks em `.claude/hooks/` (declarados
+no frontmatter dos agentes): só o `database` altera `apps/api/prisma/`, o
+`architect` só escreve em `docs/`, e `reviewer`/`security` só rodam comandos de
+leitura. Se um hook bloquear, não contorne: delegue ao agente responsável.
+
 ## Antes de dizer que terminou
 
 - `pnpm lint`, `pnpm typecheck` e os testes afetados passam

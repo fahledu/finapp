@@ -3,9 +3,10 @@
 ## 1. O que tem neste pacote
 
 ```
-finapp/
+<raiz do repositório>/
   CLAUDE.md                 # contexto do projeto, lido automaticamente em toda sessão
   GUIA.md                   # este arquivo
+  docs/adr/                 # decisões de arquitetura (dinheiro, datas, moedas, divisão...)
   .claude/agents/
     architect.md            # planeja features (só escreve em docs/)
     database.md             # schema Prisma e migrations
@@ -16,10 +17,13 @@ finapp/
     security.md             # opcional: segurança e LGPD (só leitura)
     devops.md               # opcional: Docker, CI/CD, deploy
     docs.md                 # opcional: documentação
+  .claude/hooks/
+    guard-paths.mjs         # impede agentes de editar fora da sua área
+    readonly-bash.mjs       # só deixa reviewer e security rodarem comandos de leitura
 ```
 
-Copie tudo para a raiz do seu repositório (a pasta `.claude` começa com ponto e
-pode ficar oculta no explorador de arquivos).
+A pasta `.claude` começa com ponto e pode ficar oculta no explorador de arquivos.
+Os hooks precisam do Node instalado; sem ele, as restrições não são aplicadas.
 
 ## 2. Conceitos rápidos
 
@@ -34,6 +38,10 @@ nele. Mantenha-o enxuto e atualizado; regra desatualizada atrapalha mais do que 
   sozinho, então seja específico
 - `tools`: o que ele pode fazer. Se omitir, herda todas. Restringir é bom:
   `reviewer` e `security` não editam nada de propósito
+- `hooks`: scripts que rodam antes de cada ferramenta e podem bloqueá-la. Uma
+  regra escrita só no prompt é um pedido; um hook é uma garantia. Aqui eles
+  impedem, por exemplo, que o `backend` edite `apps/api/prisma/` (área do
+  `database`) e que o `reviewer` rode comandos que alteram arquivos
 - `model`: `opus` (raciocínio pesado: planejar, revisar), `sonnet` (implementar),
   `haiku` (tarefas simples e rápidas), ou `inherit`
 - O corpo do arquivo é o prompt de sistema do agente
@@ -102,27 +110,42 @@ Faça um item por vez, com commit ao final de cada um.
 
 ### Primeira sessão: criar o projeto
 
+Pré-requisitos: Node 20+ (LTS), pnpm (`corepack enable`) e Docker Desktop.
+
 ```
-Leia o CLAUDE.md. Vamos criar o esqueleto do projeto do zero.
+Leia o CLAUDE.md e os ADRs em docs/adr/. Vamos criar o esqueleto do projeto do zero.
 
 Use o agente devops para: estrutura do monorepo com pnpm workspaces e Turborepo,
-docker-compose com Postgres 16 e Redis, .env.example e workflow de CI básico.
+docker-compose com Postgres 16 e Redis, .env.example e workflow de CI básico
+(testes de integração com Testcontainers, matriz de fuso UTC e America/Sao_Paulo).
+Os scripts devem ter os nomes da seção "Comandos" do CLAUDE.md.
+
+Depois crie packages/shared com:
+- money.ts: SUPPORTED_CURRENCIES, currencySchema e moneySchema (ADRs 0001 e 0003),
+  parse de "1.234,56" para centavos, formatação, soma que recusa moedas diferentes
+- split.ts: divisão pelo maior resto com desempate por id (ADR 0004)
+- dates.ts: localDateSchema e todayInSaoPaulo() (ADR 0002)
+- testes com fast-check, incluindo a invariância à ordem dos participantes
+
+Depois use o agente database para criar o schema Prisma inicial com as tabelas
+de infraestrutura: user, session (ADR 0007), audit_log (ADR 0005) e
+idempotency_key (ADR 0006), a primeira migration e um seed mínimo.
 
 Depois use o agente backend para criar apps/api com Fastify, TypeScript strict,
 validação de variáveis de ambiente com Zod, formato de erro padrão
 (common/errors.ts), rota GET /health e um teste para ela.
 
-Depois use o agente frontend para criar apps/web com Vite, React, Tailwind,
-shadcn/ui, TanStack Query e React Router, com uma página inicial simples que
-chama /health.
-
-Crie também packages/shared com o arquivo money.ts (helpers de centavos:
-parse de "1.234,56" para centavos, formatação, soma e divisão pelo maior resto)
-e testes com fast-check.
+Depois use o agente frontend para criar apps/web com Vite (com proxy de /api
+para a API, ADR 0007), React, Tailwind, shadcn/ui, TanStack Query e React Router,
+com uma página inicial simples que chama /health.
 
 Ao final, confirme que `pnpm dev`, `pnpm test`, `pnpm lint` e `pnpm typecheck`
-funcionam, e me explique a estrutura criada como se eu estivesse aprendendo.
+funcionam, remova a nota de status do topo do CLAUDE.md e me explique a
+estrutura criada como se eu estivesse aprendendo.
 ```
+
+Cadastro e login ficam para a sessão seguinte, pelo fluxo padrão de feature
+(architect → database → backend → frontend → qa → reviewer → security).
 
 ### Fluxo padrão de uma feature
 

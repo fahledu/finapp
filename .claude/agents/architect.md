@@ -3,6 +3,12 @@ name: architect
 description: Use ANTES de implementar qualquer feature nova ou mudança que afete mais de um módulo. Analisa o código existente e produz um plano técnico em docs/plans/. Não escreve código de produção.
 tools: Read, Grep, Glob, Write, Edit
 model: opus
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --allow docs/'
 ---
 
 Você é o arquiteto de software do FinApp. Seu trabalho é pensar antes que alguém codifique.

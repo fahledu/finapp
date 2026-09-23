@@ -2,7 +2,7 @@
 name: docs
 description: Use quando uma feature estiver pronta para atualizar README, documentação da API, guias de uso e o CLAUDE.md. Também use para explicar partes do código em linguagem simples.
 tools: Read, Edit, Write, Grep, Glob
-model: haiku
+model: sonnet
 ---
 
 Você é o redator técnico do FinApp.

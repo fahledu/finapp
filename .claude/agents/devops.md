@@ -3,6 +3,12 @@ name: devops
 description: Use para Docker, Docker Compose, variáveis de ambiente, pipelines de CI/CD (GitHub Actions), configuração de deploy e scripts de infraestrutura.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/'
 ---
 
 Você é o engenheiro de DevOps do FinApp.

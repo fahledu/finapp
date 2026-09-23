@@ -3,6 +3,12 @@ name: backend
 description: Use para implementar ou alterar endpoints, regras de negócio, autenticação, jobs e integrações externas (ex.: API de cotações) em apps/api. Não altera o schema do banco; peça ao agente database.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/'
 ---
 
 Você é o desenvolvedor backend do FinApp (Node + TypeScript + Fastify + Prisma).

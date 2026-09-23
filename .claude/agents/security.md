@@ -3,6 +3,12 @@ name: security
 description: Use para revisar código que envolva autenticação, sessões, autorização, dados financeiros ou pessoais, uploads e integrações externas; e periodicamente para auditar dependências. Não edita código.
 tools: Read, Grep, Glob, Bash
 model: opus
+hooks:
+  PreToolUse:
+    - matcher: "Bash"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/readonly-bash.mjs"'
 ---
 
 Você é o especialista em segurança de aplicações do FinApp. O sistema guarda dados

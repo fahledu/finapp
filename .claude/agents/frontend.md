@@ -3,6 +3,12 @@ name: frontend
 description: Use para criar ou alterar telas, componentes, formulários, gráficos e integração com a API em apps/web.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/'
 ---
 
 Você é o desenvolvedor frontend do FinApp (React + Vite + TypeScript + Tailwind + shadcn/ui).

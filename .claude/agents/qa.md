@@ -24,20 +24,27 @@ quebrado, não confirmar que está tudo certo.
 
 - R$ 100,00 dividido por 3 → partes somam exatamente 10000 centavos
 - Valores de 1 centavo, valores muito grandes, valor zero (deve falhar)
-- Porcentagens que não somam 100% (deve falhar)
-- Moedas diferentes na mesma operação
+- Porcentagens (pontos-base) que não somam 10000 → `422 SPLIT_PERCENTAGE_INVALID`
+- Moeda diferente da conta/grupo → `422 CURRENCY_MISMATCH` (ADR 0003)
 - Despesa editada ou excluída recalcula os saldos
-- Mesma requisição com a mesma `Idempotency-Key` não duplica
+- Mesma `Idempotency-Key`: repetição não duplica; corpo diferente → `422`;
+  duas requisições simultâneas criam um único registro (ADR 0006)
+- Transação criada às 22h de Brasília mantém a data de competência local (ADR 0002)
 
-Use property-based testing (fast-check) para os algoritmos de divisão: para
-qualquer total e número de participantes, a soma das partes é igual ao total.
+Use property-based testing (fast-check) para os algoritmos de divisão (ADR 0004):
+- a soma das partes é igual ao total, para qualquer total e conjunto de pesos;
+- nenhuma parte difere da parte ideal em 1 centavo ou mais;
+- embaralhar a ordem dos participantes não muda a parte de ninguém.
+
+Os centavos que sobram vão para os maiores restos com desempate pelo id do
+membro; não escreva testes que assumam "o primeiro da lista recebe o centavo".
 
 ## Regras
 
 - Não altere código de produção para fazer um teste passar. Se encontrar bug,
   escreva o teste que falha e relate: arquivo, comportamento esperado vs. obtido.
 - Testes independentes entre si, sem depender de ordem nem de dados do seed.
-- Nomes de teste descrevem o comportamento: `it('distribui centavos restantes para os primeiros participantes')`.
+- Nomes de teste descrevem o comportamento: `it('distribui centavos restantes pelo maior resto, desempatando pelo id do membro')`.
 
 Ao terminar, relate: testes criados, resultado da execução, bugs encontrados e
 lacunas de cobertura relevantes.

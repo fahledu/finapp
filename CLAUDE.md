@@ -21,7 +21,7 @@ de produção.
   React Hook Form + Zod, Tailwind CSS + shadcn/ui, Recharts
 - **Compartilhado (`packages/shared`):** schemas Zod, tipos e utilitários de dinheiro
   usados por API e web (fonte única de verdade dos contratos)
-- **Auth:** sessão em cookie httpOnly + senha com argon2
+- **Auth:** sessão guardada no Postgres, token em cookie httpOnly, senha com argon2id (ADR 0007)
 - **Jobs:** BullMQ + Redis (atualização de cotações, recorrências)
 - **Testes:** Vitest, Supertest, Testcontainers (Postgres real), Playwright (e2e),
   fast-check (testes de propriedade para `money.ts` e divisão)
@@ -39,7 +39,7 @@ apps/
     prisma/schema.prisma
   web/
     src/
-      features/<feature>/ # components, hooks, api.ts
+      features/<feature>/ # api.ts (fetch + hooks TanStack Query), components/, pages/, hooks/ (só hooks sem dados do servidor)
       components/ui/      # shadcn/ui
       lib/
 packages/
@@ -63,7 +63,9 @@ pnpm -F api test                # só backend
 pnpm -F web test                # só frontend
 pnpm e2e                        # Playwright
 pnpm lint && pnpm typecheck     # rodar antes de considerar algo pronto
-pnpm -F api db:migrate          # prisma migrate dev
+pnpm -F api db:migrate --name <descricao>   # prisma migrate dev
+pnpm -F api db:migrate --create-only --name <descricao>   # gera sem aplicar (para adicionar SQL)
+pnpm -F api db:generate         # prisma generate
 pnpm -F api db:seed
 ```
 
@@ -72,22 +74,35 @@ ou por nome: `pnpm -F api test -- -t "maior resto"`.
 
 ## Regras de domínio (NÃO NEGOCIÁVEIS)
 
-1. **Dinheiro nunca é float.** Valores são inteiros em centavos (`BIGINT` no banco,
-   `bigint` ou `number` inteiro no código) sempre acompanhados do código de moeda
-   ISO 4217 (`BRL`, `USD`). Use os helpers de `packages/shared/src/money.ts`.
-2. **Quantidades de investimento** (cotas, ações, cripto) usam `NUMERIC(20,8)` e
-   `Prisma.Decimal`, nunca `number`.
+Detalhes e justificativas em `docs/adr/`. Leia o ADR citado antes de mexer na área.
+
+1. **Dinheiro nunca é float.** Valores são inteiros em centavos, sempre positivos,
+   acompanhados do código de moeda ISO 4217 (`BRL`, `USD`): `BIGINT` no banco,
+   `number` inteiro seguro no código e no JSON (`{ amountCents, currency }`).
+   Conversão `bigint` ↔ `number` só no repository. Direção (entrada/saída) vem de
+   um campo `type`, não do sinal. Porcentagens em pontos-base (`10000` = 100%).
+   Use os helpers de `packages/shared/src/money.ts`. (ADR 0001)
+2. **Quantidades e preços unitários de investimento** usam `NUMERIC(20,8)` e
+   `Prisma.Decimal`, nunca `number`; no JSON trafegam como string (`"12.5"`).
+   É a única exceção à regra dos centavos; o valor derivado vira centavos uma vez,
+   no fim, com `ROUND_HALF_UP`. (ADR 0001)
 3. **Divisão de gastos:** a soma das partes deve ser exatamente igual ao total.
-   Centavos que sobram são distribuídos pelo método do maior resto, de forma
-   determinística. Existe teste para isso; não quebre.
-4. **Datas:** instantes em `timestamptz` (UTC). Data de competência de uma transação
-   é `DATE` sem hora. Fuso de exibição padrão: `America/Sao_Paulo`.
+   Centavos que sobram vão pelo maior resto; empate decidido pelo id do membro do
+   grupo em ordem crescente, então o resultado não depende da ordem de entrada.
+   Existe teste para isso; não quebre. (ADR 0004)
+4. **Datas:** instantes em `timestamptz` (UTC), ISO 8601 no JSON. Data de
+   competência é `DATE` e trafega como string `"YYYY-MM-DD"`, nunca como `Date`
+   fora do repository. "Hoje" é calculado em `America/Sao_Paulo`. (ADR 0002)
 5. **Toda query filtra pelo dono.** Nenhum usuário pode ler ou alterar dados de
-   outro. Em grupos, verificar se o usuário é membro.
+   outro. Em grupos, verificar se o usuário é membro **ativo**. (ADR 0008)
 6. **Nada é apagado de verdade** em transações, despesas e acertos: usar soft delete
-   (`deletedAt`) e registrar em `audit_log`.
+   (`deletedAt`) e registrar em `audit_log` na mesma transação. Única exceção: o
+   expurgo de exclusão de conta (LGPD), que segue o ADR 0005.
 7. Operações que criam dinheiro (transação, despesa, acerto) aceitam header
-   `Idempotency-Key` para evitar duplicidade.
+   `Idempotency-Key` para evitar duplicidade. (ADR 0006)
+8. **Uma moeda por operação.** Conta, grupo e ativo têm moeda própria; enviar
+   outra retorna `422 CURRENCY_MISMATCH`. Totais de moedas diferentes nunca são
+   somados. Sem câmbio na V1. (ADR 0003)
 
 ## Convenções
 

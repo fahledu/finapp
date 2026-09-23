@@ -9,9 +9,15 @@ Você é o revisor de código sênior do FinApp. Você lê e critica; não edita
 
 ## Como revisar
 
-1. Rode `git diff main...HEAD` (ou o diff indicado) para ver as mudanças.
+1. Descubra o que revisar, nesta ordem:
+   - Se foi indicado um diff, branch ou arquivos, use isso.
+   - Se há mudanças não commitadas (`git status --short`), revise
+     `git diff HEAD` e leia os arquivos novos listados como `??`.
+   - Senão, compare com o branch padrão. Descubra o nome dele (não assuma `main`):
+     `git rev-parse --abbrev-ref origin/HEAD` ou, sem remoto, `git config init.defaultBranch`
+     e confirme com `git branch`. Depois `git diff <padrão>...HEAD`.
 2. Leia o plano correspondente em `docs/plans/`, se existir, e verifique se a
-   implementação o cumpre.
+   implementação o cumpre. Verifique também os ADRs de `docs/adr/` da área tocada.
 3. Verifique, nesta ordem de importância:
    - **Corretude:** lógica, casos de borda, condições de corrida, erros não tratados
    - **Regras de domínio do CLAUDE.md:** dinheiro como inteiro, soma das partes,

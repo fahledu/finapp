@@ -28,12 +28,21 @@ apps/api/src/modules/<modulo>/
 - Operações financeiras que alteram vários registros rodam em `prisma.$transaction`.
 - Use os helpers de `packages/shared/src/money.ts` para somar, dividir e converter.
   Nunca faça conta de dinheiro com `number` decimal.
-- Divisão de gastos: implemente os modos igual, por valor exato, por porcentagem
-  e por cotas. Sobra de centavos pelo maior resto, com desempate determinístico
-  (ordem do id do usuário).
+- Serialização (ADRs 0001 e 0002): o repository converte `bigint` → `number`
+  (erro se não for inteiro seguro), `Prisma.Decimal` → string e data de
+  competência → `"YYYY-MM-DD"`. Service e rotas nunca veem `bigint` nem `Date`
+  de competência.
+- Divisão de gastos (ADR 0004): implemente **só os modos pedidos no plano**; a
+  ordem prevista é igual → valor exato → porcentagem → cotas. O algoritmo é a
+  função pura de `packages/shared/src/split.ts`; sobra de centavos pelo maior
+  resto, desempate pelo id do membro do grupo em ordem crescente.
+- Soft delete e auditoria (ADR 0005): use o client Prisma com a extensão de soft
+  delete; grave o `audit_log` na mesma `$transaction` da alteração.
+- Moedas (ADR 0003): moeda diferente da conta/grupo/ativo → `CURRENCY_MISMATCH`.
 - Cálculo de saldos entre membros e simplificação de dívidas ficam em funções
   puras e testadas isoladamente.
-- Suporte a `Idempotency-Key` nas rotas de criação de transação, despesa e acerto.
+- Suporte a `Idempotency-Key` nas rotas de criação de transação, despesa e acerto,
+  pelo plugin reutilizável descrito no ADR 0006 (não reimplemente por rota).
 - Erros: lance os erros de `common/errors.ts` (`NotFoundError`, `ForbiddenError`,
   `ValidationError`...). Nunca vaze stack trace ou mensagem do Prisma para o cliente.
 - Log com o logger do Fastify (pino). Nunca logue senha, token ou dado bancário.

@@ -17,7 +17,10 @@ Você é o engenheiro de DevOps do FinApp.
   inicialização da API com Zod (falhar cedo se faltar alguma)
 - GitHub Actions em `.github/workflows/`:
   - `ci.yml`: install com cache do pnpm → lint → typecheck → testes unitários e
-    de integração (com service container do Postgres) → build
+    de integração → build. Os testes de integração sobem o próprio Postgres com
+    Testcontainers (o runner `ubuntu-latest` já tem Docker); **não** declare
+    service container de Postgres no workflow. Rode os testes com `TZ=UTC` e
+    também com `TZ=America/Sao_Paulo` (matriz) para pegar bugs de fuso (ADR 0002).
   - e2e com Playwright em job separado
 - Deploy: preparar para uma plataforma simples (ex.: Railway, Render ou Fly.io)
   com migrations rodando como etapa antes de subir a nova versão

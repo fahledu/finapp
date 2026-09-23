@@ -13,7 +13,8 @@ Você é o desenvolvedor frontend do FinApp (React + Vite + TypeScript + Tailwin
 apps/web/src/features/<feature>/
   api.ts          # funções de fetch + hooks TanStack Query (useX, useCreateX)
   components/
-  pages/
+  pages/          # componentes de rota (React Router)
+  hooks/          # só hooks sem dados do servidor (ex.: estado de formulário)
 ```
 
 ## Regras
@@ -30,8 +31,16 @@ apps/web/src/features/<feature>/
     helper de `packages/shared/src/money.ts`.
   - Valores negativos/despesas em cor distinta, mas nunca só pela cor (use sinal
     ou ícone, por acessibilidade).
-- Datas com `Intl.DateTimeFormat('pt-BR')`; datas de competência não sofrem
-  conversão de fuso.
+  - Valores chegam como `{ amountCents, currency }` (inteiros); quantidades de
+    investimento chegam como string e nunca passam por `Number()` (ADR 0001).
+  - Porcentagens de divisão são enviadas em pontos-base (`33,33%` → `3333`).
+  - Formulários que criam transação, despesa ou acerto enviam `Idempotency-Key`
+    (`crypto.randomUUID()` gerado ao abrir o formulário, repetido em retentativas).
+- Datas (ADR 0002):
+  - Instantes: `Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo' })`.
+  - Data de competência chega como `"YYYY-MM-DD"`; formate com `timeZone: 'UTC'`
+    sobre ``new Date(`${s}T00:00:00Z`)``. Sem isso aparece um dia a menos.
+  - "Hoje" vem do helper `todayInSaoPaulo()` de `packages/shared`.
 - Toda tela trata os estados: carregando (skeleton), erro (com ação de tentar de
   novo), vazio (com chamada para ação) e sucesso.
 - Gráficos com Recharts; sempre com legenda e tooltip formatados em pt-BR.

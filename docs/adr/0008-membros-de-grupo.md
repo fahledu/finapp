@@ -1,6 +1,6 @@
 # 0008. Membros de grupo e participantes sem conta
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto

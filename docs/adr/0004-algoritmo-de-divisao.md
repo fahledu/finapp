@@ -1,6 +1,6 @@
 # 0004. Algoritmo de divisão de gastos
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto

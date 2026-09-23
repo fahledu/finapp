@@ -1,6 +1,6 @@
 # 0006. Idempotência de operações financeiras
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto

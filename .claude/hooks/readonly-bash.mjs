@@ -19,7 +19,8 @@ const ALLOWED = [
 const FORBIDDEN = [
   { pattern: /`|\$\(/, reason: 'substituição de comando' },
   { pattern: /--fix\b/, reason: '--fix altera arquivos' },
-  { pattern: /--output\b/, reason: '--output grava arquivo' },
+  { pattern: /--output\w*/, reason: '--output/--outputFile grava arquivo' },
+  { pattern: /\bpnpm\b[^|;&\n]*\s(-u|--update\S*)(\s|$)/, reason: 'atualização de snapshots grava arquivo' },
   { pattern: /\s-(delete|exec|execdir|ok|okdir|fprint0?|fprintf|fls)\b/, reason: 'find com ação' },
   { pattern: /\bsort\b[^|;&\n]*\s-[a-zA-Z]*o/, reason: 'sort -o grava arquivo' },
   { pattern: /\s(-O\S*|--open-files-in-pager)\b/, reason: 'git grep -O executa programa' },

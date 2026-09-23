@@ -14,9 +14,9 @@
     frontend.md             # React
     qa.md                   # testes
     reviewer.md             # revisão de código (só leitura)
-    security.md             # opcional: segurança e LGPD (só leitura)
-    devops.md               # opcional: Docker, CI/CD, deploy
-    docs.md                 # opcional: documentação
+    security.md             # segurança e LGPD (só leitura)
+    devops.md               # Docker, CI/CD, deploy
+    docs.md                 # documentação
   .claude/hooks/
     guard-paths.mjs         # impede agentes de editar fora da sua área
     readonly-bash.mjs       # só deixa reviewer e security rodarem comandos de leitura
@@ -41,7 +41,9 @@ nele. Mantenha-o enxuto e atualizado; regra desatualizada atrapalha mais do que 
 - `hooks`: scripts que rodam antes de cada ferramenta e podem bloqueá-la. Uma
   regra escrita só no prompt é um pedido; um hook é uma garantia. Aqui eles
   impedem, por exemplo, que o `backend` edite `apps/api/prisma/` (área do
-  `database`) e que o `reviewer` rode comandos que alteram arquivos
+  `database`), que um agente edite `.claude/` (e desligue os próprios hooks) e
+  que o `reviewer` rode comandos que alteram arquivos. Limite: o hook de caminhos
+  vale para Edit/Write, não para comandos de shell
 - `model`: `opus` (raciocínio pesado: planejar, revisar), `sonnet` (implementar),
   `haiku` (tarefas simples e rápidas), ou `inherit`
 - O corpo do arquivo é o prompt de sistema do agente
@@ -83,8 +85,8 @@ Sua escolha (Node + TypeScript + React + PostgreSQL) é ótima. O que acrescente
   precisa ir para alguém de forma previsível (maior resto).
 - **Simplificação de dívidas:** se A deve 10 a B e B deve 10 a C, basta A pagar 10 a C.
   É o recurso mais "mágico" do Splitwise e um ótimo exercício de algoritmo.
-- **Múltiplas moedas:** decida cedo se vai suportar (ex.: viagem em USD). Se sim,
-  guarde a taxa de câmbio usada em cada operação.
+- **Múltiplas moedas:** decidido no ADR 0003. BRL, USD e EUR, uma moeda por
+  operação e sem câmbio na V1; totais de moedas diferentes nunca são somados.
 - **Cotações:** para ativos da B3 existem APIs públicas como a brapi; para cripto,
   CoinGecko. Verifique limites e termos de uso de cada uma.
 - **LGPD:** dados financeiros são sensíveis. Planeje exportação e exclusão de conta.

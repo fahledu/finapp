@@ -9,5 +9,29 @@
       "Read(**/.env.production)",
       "Read(**/.env.test)"
     ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-docs-on-stop.mjs\"",
+            "statusMessage": "Conferindo consistência da documentação"
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-docs-on-stop.mjs\"",
+            "statusMessage": "Conferindo consistência da documentação"
+          }
+        ]
+      }
+    ]
   }
 }

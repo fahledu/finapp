@@ -1,6 +1,6 @@
 # 0003. Suporte a moedas na V1
 
-- Status: Aceito
+- Status: Aceito (complementado por [0028](0028-contas-moeda-arquivamento-e-relatorios.md))
 - Data: 2026-09-23
 
 ## Contexto

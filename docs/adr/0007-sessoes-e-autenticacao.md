@@ -1,6 +1,6 @@
 # 0007. Sessões, CSRF e proteção de autenticação
 
-- Status: Aceito
+- Status: Aceito (complementado por [0032](0032-retencao-de-dados-pessoais.md); limites de login **alterados** por [0033](0033-ajustes-de-autenticacao.md))
 - Data: 2026-09-23
 
 ## Contexto

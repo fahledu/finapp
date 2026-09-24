@@ -104,7 +104,8 @@ plano e pede decisão antes de implementar.
    grupo em ordem crescente, então o resultado não depende da ordem de entrada.
    Nenhuma parte pode ser zero: rejeite com `422 SPLIT_SHARE_ZERO`.
    Pagamentos ficam em `expense_payment` (soma = total). Existe teste para isso;
-   não quebre. (ADR 0004)
+   não quebre. (ADR 0004) Despesa ou acerto com membro `LEFT` →
+   `409 MEMBER_NOT_ACTIVE`. Parcelas usam `splitEvenly`, não `split.ts`. (ADRs 0029 e 0030)
 4. **Datas:** instantes em `timestamptz` (UTC), ISO 8601 no JSON. Data de
    competência é `DATE` e trafega como string `"YYYY-MM-DD"`, nunca como `Date`
    fora do repository. "Hoje" é calculado em `America/Sao_Paulo`. (ADR 0002)
@@ -112,24 +113,35 @@ plano e pede decisão antes de implementar.
    outro. Em grupos, verificar se o usuário é membro **ativo**. (ADR 0008)
 6. **Nada é apagado de verdade** em transações, transferências, parcelamentos,
    despesas (com partes e pagamentos) e acertos: usar soft delete (`deletedAt`,
-   extensão Prisma + `notDeleted` em relações) e registrar em `audit_log` na mesma
-   transação. (ADR 0005) Única exceção: o expurgo de exclusão de conta (LGPD),
-   que segue o ADR 0010.
+   extensão Prisma + `notDeleted` em relações; escrita aninhada só cria) e registrar
+   em `audit_log` na mesma transação. Triggers no banco recusam `DELETE` físico e
+   alteração do `audit_log`.
+   (ADRs 0005 e 0027) Única exceção: o expurgo de exclusão de conta (LGPD), que
+   segue o ADR 0010.
 7. Operações que criam dinheiro (transação, transferência, parcelamento, despesa,
    acerto) aceitam header `Idempotency-Key` para evitar duplicidade. (ADR 0006)
 8. **Moedas aceitas: `BRL`, `USD`, `EUR`** (`SUPPORTED_CURRENCIES` em
    `packages/shared`), todas com 2 casas decimais; nunca aceite código ISO
    arbitrário. **Uma moeda por operação.** Conta, grupo e ativo têm moeda própria; enviar
    outra retorna `422 CURRENCY_MISMATCH`. Totais de moedas diferentes nunca são
-   somados. Sem câmbio na V1. (ADR 0003)
+   somados. Sem câmbio na V1. Moeda (e tipo de conta) não muda depois do primeiro
+   lançamento. (ADRs 0003 e 0028)
+9. **Relatórios, dashboard e orçamentos** leem só a view `reportable_transaction`
+   (exclui transferências, saldo inicial, acertos e apagados; mês de referência do
+   cartão = fatura). Nunca refaça esses filtros à mão. (ADRs 0028 e 0029)
 
 ## Convenções
 
 - TypeScript strict, sem `any`. Se for inevitável, comentar o porquê.
-- Validação na borda: toda entrada da API passa por schema Zod de `packages/shared`.
+- Validação na borda: toda entrada da API passa por schema Zod de `packages/shared`,
+  via type provider, e toda rota declara schema de resposta. Listas que crescem
+  usam cursor (`{ items, nextCursor }`). (ADR 0026)
 - Camadas no backend: `routes` (HTTP) → `service` (regra de negócio) → `repository` (Prisma).
   Regra de negócio nunca fica na rota. A rota abre a transação (`withIdempotency`
   ou `runInTransaction`) e passa `tx` explicitamente a service e repository (ADR 0025).
+  Job disparado por operação vai pelo outbox (`outbox.add(tx, ...)`), nunca
+  `queue.add` direto (ADR 0031).
+- Logs sem cookie, token, e-mail nem corpo de requisição; retenção de 30 dias (ADR 0032).
 - Erros no formato `{ error: { code, message, details? } }` (ver `apps/api/src/common/errors.ts`).
   Status: entrada inválida (Zod) → `422 VALIDATION_ERROR`; JSON malformado → `400`;
   sem sessão → `401`; recurso inexistente **ou de outro usuário** → `404`; sem
@@ -158,6 +170,11 @@ As áreas de cada agente são garantidas por hooks em `.claude/hooks/` (declarad
 no frontmatter dos agentes): só o `database` altera `apps/api/prisma/`, o
 `architect` só escreve em `docs/`, e `reviewer`/`security` só rodam comandos de
 leitura. Se um hook bloquear, não contorne: delegue ao agente responsável.
+Limite conhecido: o hook de caminhos vale para Edit/Write, não para Bash. Usar
+shell (`sed -i`, redirecionamento, `pnpm db:migrate` fora do `database`) para
+alterar área de outro agente é contornar o hook, e é proibido pelo mesmo motivo.
+Arquivos `.env` (exceto `.env.example`) são bloqueados para leitura em
+`.claude/settings.json`; não os leia por shell.
 
 ## Antes de dizer que terminou
 

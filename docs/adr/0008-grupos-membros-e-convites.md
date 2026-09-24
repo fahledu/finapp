@@ -1,6 +1,6 @@
 # 0008. Grupos: membros e convites
 
-- Status: Aceito
+- Status: Aceito (complementado por [0030](0030-acertos-simplificacao-e-membros-inativos.md))
 - Data: 2026-09-23
 
 ## Contexto

@@ -1,6 +1,6 @@
 # 0005. Soft delete e auditoria
 
-- Status: Aceito
+- Status: Aceito (complementado por [0027](0027-soft-delete-no-banco.md))
 - Data: 2026-09-23
 
 ## Contexto

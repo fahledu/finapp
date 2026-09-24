@@ -102,7 +102,7 @@ Sua escolha (Node + TypeScript + React + PostgreSQL) é ótima. O que acrescente
 5. Dashboard com saldo e gastos por categoria
 6. Grupos, membros e convites (ADR 0008)
 7. Despesas divididas (modo igual primeiro, depois os outros)
-8. Saldos entre membros, acertos e simplificação de dívidas (precisa de ADR antes)
+8. Saldos entre membros, acertos e simplificação de dívidas (ADR 0030)
 9. Orçamentos mensais por categoria
 10. Investimentos: ativos, operações de compra/venda, preço médio, posição
 11. Cotações automáticas e rentabilidade

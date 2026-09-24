@@ -1,6 +1,6 @@
 # 0021. Saldo inicial de conta e categorias padrão
 
-- Status: Aceito
+- Status: Aceito (complementado por [0028](0028-contas-moeda-arquivamento-e-relatorios.md))
 - Data: 2026-09-23
 
 ## Contexto

@@ -1,6 +1,6 @@
 # 0014. Envio de e-mail e tokens de uso único
 
-- Status: Aceito
+- Status: Aceito (complementado por [0031](0031-outbox-de-jobs.md); invalidação de tokens de reset **alterada** por [0033](0033-ajustes-de-autenticacao.md))
 - Data: 2026-09-23
 
 ## Contexto

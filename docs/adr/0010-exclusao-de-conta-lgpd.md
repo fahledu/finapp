@@ -1,6 +1,6 @@
 # 0010. Exclusão de conta (LGPD)
 
-- Status: Aceito
+- Status: Aceito (complementado por [0030](0030-acertos-simplificacao-e-membros-inativos.md) e [0032](0032-retencao-de-dados-pessoais.md))
 - Data: 2026-09-23
 
 ## Contexto

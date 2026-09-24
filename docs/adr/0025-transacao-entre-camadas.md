@@ -1,6 +1,6 @@
 # 0025. Transação atravessando camadas
 
-- Status: Aceito
+- Status: Aceito (complementado por [0031](0031-outbox-de-jobs.md))
 - Data: 2026-09-24
 - Complementa: [0006](0006-idempotencia.md)
 

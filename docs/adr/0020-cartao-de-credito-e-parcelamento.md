@@ -1,6 +1,6 @@
 # 0020. Cartão de crédito e compras parceladas
 
-- Status: Aceito
+- Status: Aceito (complementado por [0029](0029-parcelas-e-mes-de-referencia.md))
 - Data: 2026-09-23
 
 ## Contexto

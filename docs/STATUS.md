@@ -7,73 +7,35 @@ for resolvida. Questão resolvida sai daqui e vai para um ADR ou plano.
 - **Última atualização:** 2026-09-24
 - **Fase:** documentação pronta, sem código.
 - **Próximo passo:** roadmap item 1, pelo prompt "Primeira sessão" do GUIA.md.
-  Antes, resolver as questões marcadas com **(antes do item 1)**.
 
 ## Feito
 
 - ADRs 0001–0021 aceitos e consolidados (linha de base de 2026-09-24, ver `docs/adr/README.md`).
 - ADR 0024: limites de valores monetários e decimais.
 - ADR 0025: transação passada explicitamente entre camadas.
-- Agentes e hooks de área em `.claude/`.
+- ADR 0026: convenções de API (cursor, filtros, type provider com schema de resposta).
+- ADR 0027: soft delete e `audit_log` garantidos no banco (triggers) e escritas aninhadas.
+- ADR 0028: moeda e tipo de conta fixos, arquivamento de conta, view `reportable_transaction`.
+- ADR 0029: `splitEvenly` para parcelas, mês de referência do cartão, edição de parcelamento.
+- ADR 0030: acertos, simplificação de dívidas, membros inativos.
+- ADR 0031: outbox de jobs.
+- ADR 0032: retenção de backups, sessões e logs.
+- ADR 0033: rate limit de login por falha e tokens de reset simultâneos.
+- Agentes e hooks de área em `.claude/`, com as brechas da revisão fechadas:
+  `readonly-bash` bloqueia `<(`, `--pre`, `--compress-program`, `--ext-diff`,
+  `--textconv`; `database` não edita `.claude/`; `docs` só escreve documentação;
+  `.claude/settings.json` bloqueia leitura de `.env`.
 
-## Pendências de ferramenta (hooks e agentes)
+## Limites aceitos
 
-- [ ] `readonly-bash.mjs` deixa passar comandos que executam programas:
-      `cat <(cmd)`, `rg --pre prog`, `sort --compress-program=prog`. Bloquear
-      `<(`, `--pre` e `--compress-program`.
-- [ ] Agente `database` não tem hook: pode editar `.claude/` e desligar os hooks
-      dos outros. Dar a ele `--deny .claude/`.
-- [ ] Agente `docs` deveria só comentar código, mas o hook permite editar `apps/`.
-      Restringir a `docs/`, `README.md` e `CLAUDE.md` (JSDoc em `packages/shared`
-      fica com quem escreve o código).
-- [ ] Não existe `.claude/settings.json`: sessão principal sem restrição e nada
-      impede ler `.env`. Criar com `deny` para `Read(.env*)`.
-- [ ] Limite conhecido: agentes com Bash contornam o `guard-paths` (`sed -i`,
-      `pnpm db:migrate`). Documentar no CLAUDE.md ou aceitar.
+- Hooks de caminho valem para Edit/Write, não para Bash (registrado no CLAUDE.md).
+- `pnpm test`/`lint` rodados pelos agentes de revisão executam scripts do projeto.
 
-## Questões de domínio em aberto
+## Questões em aberto
 
-Não estão decididas em nenhum ADR. O architect traz cada uma para decisão ao
-planejar a feature indicada.
-
-**Antes do item 1** (afetam `packages/shared` e a primeira migration)
-
-- [ ] **Convenções de API:** paginação (cursor ou offset), filtros e ordenação;
-      integração Zod 4 ↔ Fastify (type provider) para validação e OpenAPI.
-- [ ] **Soft delete em escritas aninhadas.** A extensão (ADR 0005) não pega
-      `update({ data: { shares: { deleteMany } } })` nem `upsert`. Proibir por
-      lint/revisão ou tratar na extensão.
-
-**Contas e transações (itens 2–5)**
-
-- [ ] Uma definição única de "transação que entra em relatório" (exclui
-      `TRANSFER`, `is_opening_balance` e `source_type` de acerto): view ou helper.
-- [ ] Moeda de conta e grupo é imutável depois que existem lançamentos?
-- [ ] Conta pode ser excluída ou arquivada? (Hoje só categoria tem regra.)
-- [ ] Parcelamento (ADR 0020): `split.ts` desempata por id como **string**; com
-      números de parcela, `"10" < "2"`. Precisa de chave numérica ou zero à esquerda.
-- [ ] Parcelamento: data de competência de cada parcela; editar o total pode
-      gerar parcela zero ou negativa nas faturas abertas.
-- [ ] Orçamento conta compra à vista no cartão pela data ou pelo `statement_month`?
-
-**Grupos (itens 6–8)**
-
-- [ ] **Membro `LEFT` ganhando saldo.** Sair exige saldo zero, mas editar ou
-      apagar despesa antiga com ele muda o saldo de quem não tem mais acesso.
-      Bloquear a edição ou recusar despesas com membro `LEFT`.
-- [ ] ADR de acertos e simplificação de dívidas (ver `docs/adr/README.md`).
-- [ ] Dashboard "sua parte em grupos" (ADR 0018) inclui grupos de que o usuário saiu?
-
-**Confiabilidade**
-
-- [ ] Job enfileirado depois do commit se perde se o processo cair no meio (ADR 0025). Avaliar padrão outbox quando e-mail (ADR 0014) for implementado.
-
-**Segurança e LGPD**
-
-- [ ] Backups guardam dados já expurgados: definir retenção e documentar.
-- [ ] Retenção de `session.ip`, `session.user_agent` e logs do pino.
-- [ ] Limite de reset por e-mail (3/h) permite a um atacante esgotar o reset da
-      vítima; limite de login por IP afeta usuários atrás de CGNAT.
+Nenhuma bloqueando o item 1. As que dependem de feature estão em
+`docs/adr/README.md` ("Decisões ainda sem ADR"): investimentos, orçamentos,
+recorrências, importação de extrato e câmbio.
 
 ## Lembretes com data
 

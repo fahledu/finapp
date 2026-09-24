@@ -13,6 +13,7 @@ for resolvida. Questão resolvida sai daqui e vai para um ADR ou plano.
 
 - ADRs 0001–0021 aceitos e consolidados (linha de base de 2026-09-24, ver `docs/adr/README.md`).
 - ADR 0024: limites de valores monetários e decimais.
+- ADR 0025: transação passada explicitamente entre camadas.
 - Agentes e hooks de área em `.claude/`.
 
 ## Pendências de ferramenta (hooks e agentes)
@@ -37,9 +38,6 @@ planejar a feature indicada.
 
 **Antes do item 1** (afetam `packages/shared` e a primeira migration)
 
-- [ ] **Transação atravessando camadas.** Idempotência (plugin), operação e
-      `audit_log` precisam da mesma `$transaction`. Escolher: passar `tx`
-      explicitamente ou `AsyncLocalStorage`.
 - [ ] **Convenções de API:** paginação (cursor ou offset), filtros e ordenação;
       integração Zod 4 ↔ Fastify (type provider) para validação e OpenAPI.
 - [ ] **Soft delete em escritas aninhadas.** A extensão (ADR 0005) não pega
@@ -65,6 +63,10 @@ planejar a feature indicada.
       Bloquear a edição ou recusar despesas com membro `LEFT`.
 - [ ] ADR de acertos e simplificação de dívidas (ver `docs/adr/README.md`).
 - [ ] Dashboard "sua parte em grupos" (ADR 0018) inclui grupos de que o usuário saiu?
+
+**Confiabilidade**
+
+- [ ] Job enfileirado depois do commit se perde se o processo cair no meio (ADR 0025). Avaliar padrão outbox quando e-mail (ADR 0014) for implementado.
 
 **Segurança e LGPD**
 

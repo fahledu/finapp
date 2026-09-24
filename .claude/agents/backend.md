@@ -31,7 +31,11 @@ apps/api/src/modules/<modulo>/
   existir, crie-o lá primeiro para que o frontend reutilize.
 - Autorização em toda rota: o usuário só acessa os próprios dados; em grupos,
   verifique membresia no repository ou num guard reutilizável.
-- Operações financeiras que alteram vários registros rodam em `prisma.$transaction`.
+- Transação (ADR 0025): a rota abre a transação com `withIdempotency(request, input, (tx) => ...)`
+  (operações que criam dinheiro) ou `runInTransaction((tx) => ...)` (demais
+  escritas). Service e repository recebem `tx: Db` como primeiro parâmetro e nunca
+  importam o client global nem chamam `$transaction`. Nada de e-mail ou API
+  externa dentro da transação: enfileire um job depois do commit.
 - Use os helpers de `packages/shared/src/money.ts` para somar, dividir e converter.
   Nunca faça conta de dinheiro com `number` decimal.
 - Serialização (ADRs 0001 e 0002): o repository converte `bigint` → `number`
@@ -53,8 +57,9 @@ apps/api/src/modules/<modulo>/
 - Moedas (ADR 0003): moeda diferente da conta/grupo/ativo → `CURRENCY_MISMATCH`.
 - Cálculo de saldos entre membros e simplificação de dívidas ficam em funções
   puras e testadas isoladamente.
-- Suporte a `Idempotency-Key` nas rotas de criação de transação, despesa e acerto,
-  pelo plugin reutilizável descrito no ADR 0006 (não reimplemente por rota).
+- Suporte a `Idempotency-Key` nas operações que criam dinheiro (CLAUDE.md, regra
+  7), pela função reutilizável `withIdempotency` (ADRs 0006 e 0025); não
+  reimplemente por rota.
 - Erros: lance os erros de `common/errors.ts` (`NotFoundError`, `ForbiddenError`,
   `ValidationError`...), com os status definidos no CLAUDE.md (validação `422`,
   recurso de outro usuário `404`). Configure o error handler global para que

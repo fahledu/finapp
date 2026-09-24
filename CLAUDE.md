@@ -128,7 +128,8 @@ plano e pede decisão antes de implementar.
 - TypeScript strict, sem `any`. Se for inevitável, comentar o porquê.
 - Validação na borda: toda entrada da API passa por schema Zod de `packages/shared`.
 - Camadas no backend: `routes` (HTTP) → `service` (regra de negócio) → `repository` (Prisma).
-  Regra de negócio nunca fica na rota.
+  Regra de negócio nunca fica na rota. A rota abre a transação (`withIdempotency`
+  ou `runInTransaction`) e passa `tx` explicitamente a service e repository (ADR 0025).
 - Erros no formato `{ error: { code, message, details? } }` (ver `apps/api/src/common/errors.ts`).
   Status: entrada inválida (Zod) → `422 VALIDATION_ERROR`; JSON malformado → `400`;
   sem sessão → `401`; recurso inexistente **ou de outro usuário** → `404`; sem

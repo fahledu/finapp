@@ -31,7 +31,9 @@ Você é o revisor de código sênior do FinApp. Você lê e critica; não edita
      bloqueante quando: `include`/`select` de relação com soft delete sem
      `where: notDeleted`, `delete`/`deleteMany` nesses modelos, SQL cru sem
      `deleted_at IS NULL`, ou import de `prismaUnfiltered` fora de auditoria,
-     exportação e expurgo
+     exportação e expurgo. Transação (ADR 0025) é bloqueante quando: service
+     ou repository importa o client global ou chama `$transaction`, escrita e
+     `audit_log` em `tx` diferentes, ou chamada externa dentro da transação
    - **Autorização:** alguma rota permite acessar dados de outro usuário?
    - **Testes:** a mudança tem testes? Eles testariam de fato uma regressão?
    - **Design:** camadas respeitadas (sem regra de negócio na rota), duplicação,

@@ -23,7 +23,7 @@ Foi uma exceção única; a partir daqui, a imutabilidade acima vale sem exceç�
 | [0003](0003-moedas.md) | Suporte a moedas na V1 | Aceito |
 | [0004](0004-despesas-de-grupo.md) | Despesas de grupo: divisão, pagadores e saldos | Aceito |
 | [0005](0005-soft-delete-e-auditoria.md) | Soft delete e auditoria | Aceito |
-| [0006](0006-idempotencia.md) | Idempotência de operações financeiras | Aceito |
+| [0006](0006-idempotencia.md) | Idempotência de operações financeiras | Aceito, complementado por 0025 |
 | [0007](0007-sessoes-e-autenticacao.md) | Sessões, CSRF e proteção de autenticação | Aceito |
 | [0008](0008-grupos-membros-e-convites.md) | Grupos: membros e convites | Aceito |
 | [0010](0010-exclusao-de-conta-lgpd.md) | Exclusão de conta (LGPD) | Aceito |
@@ -35,10 +35,11 @@ Foi uma exceção única; a partir daqui, a imutabilidade acima vale sem exceç�
 | [0020](0020-cartao-de-credito-e-parcelamento.md) | Cartão de crédito e compras parceladas | Aceito |
 | [0021](0021-saldo-inicial-e-categorias.md) | Saldo inicial de conta e categorias padrão | Aceito |
 | [0024](0024-limites-de-valores.md) | Limites de valores monetários e decimais | Aceito |
+| [0025](0025-transacao-entre-camadas.md) | Transação atravessando camadas | Aceito |
 
 **Números aposentados** (incorporados na consolidação; nunca reutilize):
 0009 e 0022 → 0004 · 0012 → 0005 · 0016 → 0006 · 0015 → 0007 · 0023 → 0008 ·
-0017 → 0010. O próximo ADR novo é o **0025**. O conteúdo antigo está no histórico
+0017 → 0010. O próximo ADR novo é o **0026**. O conteúdo antigo está no histórico
 do git.
 
 ## Decisões ainda sem ADR

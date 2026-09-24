@@ -1,6 +1,6 @@
 # 0006. Idempotência de operações financeiras
 
-- Status: Aceito
+- Status: Aceito (complementado por [0025](0025-transacao-entre-camadas.md))
 - Data: 2026-09-23
 
 ## Contexto

@@ -1,13 +1,16 @@
-# 0003. Suporte a moedas na V1
+# 0003. Moedas
 
-- Status: Aceito (complementado por [0028](0028-contas-moeda-arquivamento-e-relatorios.md))
-- Data: 2026-09-23
+- Status: Aceito
+- Data: 2026-09-24
 
 ## Contexto
 
-Todo valor já é guardado com código de moeda (ADR 0001), mas não havia regra para
+Todo valor é guardado com código de moeda (ADR 0001), mas é preciso regra para
 operações com moedas diferentes: despesa em USD num grupo em BRL, dashboard somando
-contas em moedas distintas, carteira com ativos no exterior.
+contas em moedas distintas, carteira com ativos no exterior. Também é preciso
+dizer se a moeda de uma conta, grupo ou ativo pode mudar depois de haver
+lançamentos: trocar `BRL` por `USD` numa conta com histórico faria os mesmos
+centavos passarem a significar outro valor.
 
 ## Decisão
 
@@ -30,15 +33,25 @@ por todos os schemas. Código fora da lista → `422 VALIDATION_ERROR`.
 - Cada conta tem uma moeda; transações usam a moeda da conta.
 - Cada grupo tem uma moeda; despesas e acertos usam a moeda do grupo.
 - Ativos têm a moeda em que são cotados; posição e rentabilidade ficam nessa moeda.
-- Enviar moeda diferente da esperada retorna `422` com código `CURRENCY_MISMATCH`.
+- Enviar moeda diferente da esperada retorna `422 CURRENCY_MISMATCH`.
 - Totais (dashboard, patrimônio) são **agrupados por moeda** e exibidos
   separadamente. Nunca somar valores de moedas diferentes.
 - Helpers de `money.ts` que combinam dois valores lançam erro se as moedas diferirem.
+
+**Moeda fixa depois do primeiro lançamento**
+
+- `currency` de conta, grupo e ativo só pode mudar enquanto nenhuma operação a
+  referencia, **contando registros com soft delete**.
+- Depois disso, tentativa de troca → `409 CURRENCY_LOCKED`.
 
 ## Consequências
 
 - Simples de implementar e testar; não há fonte de câmbio para manter.
 - Viagem ao exterior exige converter manualmente antes de lançar.
+- Trocar moeda por engano antes do primeiro lançamento continua fácil; depois,
+  o caminho é criar outra conta (ou grupo).
+- A verificação de "tem histórico" consulta tabelas com soft delete **sem** o
+  filtro da extensão (ADR 0010); o repository precisa de consulta explícita.
 - Como a moeda já está em todas as tabelas, suportar câmbio depois é aditivo:
   operações antigas não têm conversão, então não há dado a migrar.
 
@@ -64,3 +77,4 @@ necessária para cálculos futuros, como custo em BRL para imposto de renda.
 - **Aceitar qualquer código ISO 4217:** moedas com 0 ou 3 casas decimais seriam
   gravadas com escala errada sem nenhum erro.
 - **Enum de moeda no banco:** cada moeda nova exigiria migration.
+- **Moeda editável sempre:** reinterpreta valores históricos.

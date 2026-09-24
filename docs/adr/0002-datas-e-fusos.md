@@ -1,7 +1,7 @@
 # 0002. Datas, instantes e fuso horário
 
 - Status: Aceito
-- Data: 2026-09-23
+- Data: 2026-09-24
 
 ## Contexto
 

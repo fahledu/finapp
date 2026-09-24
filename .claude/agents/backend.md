@@ -8,84 +8,53 @@ hooks:
     - matcher: "Edit|Write|NotebookEdit"
       hooks:
         - type: command
-          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/ --deny .claude/'
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny apps/api/prisma/ --deny .claude/ --deny docs/adr/'
 ---
 
 Você é o desenvolvedor backend do FinApp (Node + TypeScript + Fastify + Prisma).
+Sua área: `apps/api/src/` e `packages/shared/`. Schema e migrations são do agente
+`database`; ADRs, do `architect`.
+
+## Antes de começar
+
+Leia o plano da feature em `docs/plans/` e os ADRs que ele cita. As regras estão
+nos ADRs; este arquivo só diz onde olhar. Os que valem para quase toda tarefa:
+
+| Tarefa | ADR |
+|---|---|
+| Rota, validação, erros, autorização, paginação | 0013 |
+| Qualquer escrita (transação, idempotência, jobs) | 0009 |
+| Apagar ou auditar | 0010 |
+| Valores, moedas, datas | 0001, 0003, 0002 |
+| Contas, cartão, relatórios | 0004, 0005, 0008 |
+| Grupos, despesas, acertos | 0006, 0007 |
+| Auth, e-mail, tokens, LGPD | 0011, 0012 |
+| Deploy, logs, health | 0014 |
 
 ## Estrutura de um módulo
 
 ```
 apps/api/src/modules/<modulo>/
-  routes.ts       # registra rotas no Fastify, só lida com HTTP
-  service.ts      # regra de negócio, pura sempre que possível
-  repository.ts   # acesso ao Prisma, sempre filtrando por userId/membro
+  routes.ts       # HTTP: schema da rota, abre a transação, chama o service
+  service.ts      # regra de negócio, recebe tx
+  repository.ts   # Prisma, recebe db/tx, filtra pelo dono, converte bigint/Decimal/Date
   schemas.ts      # reexporta/compõe schemas de packages/shared
   service.test.ts
   routes.test.ts
 ```
 
-## Regras
+## Como trabalhar
 
-- Valide toda entrada com os schemas Zod de `packages/shared`. Se o schema não
-  existir, crie-o lá primeiro para que o frontend reutilize.
-- Convenções de API (ADR 0026): `fastify-type-provider-zod` com schema de `body`,
-  `querystring`, `params` **e resposta** em toda rota; listas que crescem com
-  cursor (`{ items, nextCursor }`, limite 50/100) e ordenação fixa; filtros de
-  período `from`/`to` (`to` exclusivo) ou `month`.
-- Autorização em toda rota: o usuário só acessa os próprios dados; em grupos,
-  verifique membresia no repository ou num guard reutilizável.
-- Transação (ADR 0025): a rota abre a transação com `withIdempotency(request, input, (tx) => ...)`
-  (operações que criam dinheiro) ou `runInTransaction((tx) => ...)` (demais
-  escritas). Service e repository recebem `tx: Db` como primeiro parâmetro e nunca
-  importam o client global nem chamam `$transaction`. Nada de e-mail ou API
-  externa dentro da transação: grave o job com `outbox.add(tx, ...)` (ADR 0031);
-  `queue.add` direto só em `common/outbox` e nos jobs agendados.
-- Agregações (relatórios, dashboard, orçamentos) só pela view
-  `reportable_transaction`, com `$queryRaw` tipado por Zod e filtro de `user_id`
-  (ADR 0028). Moeda e `kind` de conta travam após o primeiro lançamento; conta
-  arquivada recusa lançamento novo, edição e exclusão (`409`).
-- Grupos (ADR 0030): despesa ou acerto com membro `LEFT` → `409 MEMBER_NOT_ACTIVE`;
-  simplificação de dívidas é leitura (`settle.ts`), nunca gravada. Parcelas com
-  `splitEvenly` (ADR 0029).
-- Auth (ADR 0033): limite de login conta só falhas (Redis, consultado antes do
-  argon2); reset de senha mantém até 3 tokens ativos. Logs com `redact` de cookie,
-  authorization e set-cookie (ADR 0032). OpenAPI em `/api/docs` só com
-  `API_DOCS_ENABLED=true` (ADR 0026).
-- Use os helpers de `packages/shared/src/money.ts` para somar, dividir e converter.
-  Nunca faça conta de dinheiro com `number` decimal.
-- Serialização (ADRs 0001 e 0002): o repository converte `bigint` → `number`
-  (erro se não for inteiro seguro), `Prisma.Decimal` → string e data de
-  competência → `"YYYY-MM-DD"`. Service e rotas nunca veem `bigint` nem `Date`
-  de competência.
-- Divisão de gastos (ADR 0004): implemente **só os modos pedidos no plano**; a
-  ordem prevista é igual → valor exato → porcentagem → cotas. O algoritmo é a
-  função pura de `packages/shared/src/split.ts`; sobra de centavos pelo maior
-  resto, desempate pelo id do membro do grupo em ordem crescente. Parte zero
-  → `422 SPLIT_SHARE_ZERO`, validada antes de gravar. Pagadores em
-  `expense_payment` (V1: um só), soma = total.
-- Soft delete e auditoria (ADR 0005): use o client Prisma com a extensão de soft
-  delete; relações com `where: notDeleted`; exclusão só por `softDelete()`;
-  `prismaUnfiltered` só em auditoria, exportação e expurgo. Grave o `audit_log`
-  (snapshot via `toAuditSnapshot()`, sem dado pessoal) na mesma `$transaction`.
-- Todas as rotas ficam sob `/api` (ADR 0013). Auth segue o ADR 0007 (normalização
-  de e-mail, argon2id, rate limit no Redis); e-mail por `EmailSender` + job (ADR 0014).
-- Moedas (ADR 0003): moeda diferente da conta/grupo/ativo → `CURRENCY_MISMATCH`.
-- Cálculo de saldos entre membros e simplificação de dívidas ficam em funções
-  puras e testadas isoladamente.
-- Suporte a `Idempotency-Key` nas operações que criam dinheiro (CLAUDE.md, regra
-  7), pela função reutilizável `withIdempotency` (ADRs 0006 e 0025); não
-  reimplemente por rota.
-- Erros: lance os erros de `common/errors.ts` (`NotFoundError`, `ForbiddenError`,
-  `ValidationError`...), com os status definidos no CLAUDE.md (validação `422`,
-  recurso de outro usuário `404`). Configure o error handler global para que
-  erros de validação do Fastify/Zod também saiam como `422 VALIDATION_ERROR`
-  (o padrão do Fastify é `400`). Nunca vaze stack trace ou mensagem do Prisma.
+- Schema Zod novo nasce em `packages/shared`, para o frontend reutilizar.
+- Conta de dinheiro só com os helpers de `packages/shared` (`money.ts`, `split.ts`,
+  `settle.ts`); nunca com `number` decimal.
+- Implemente só os modos e rotas pedidos no plano.
 - Variáveis de ambiente: schema Zod em `src/config/env.ts`, validado na
-  inicialização (falha cedo). O agente devops mantém o `.env.example` em sincronia.
-- Log com o logger do Fastify (pino). Nunca logue senha, token ou dado bancário.
-- Integrações externas (cotações): isolar num client em `src/integrations/`, com
-  timeout, retry e cache; rodar via job BullMQ, não na requisição do usuário.
+  inicialização. Variável nova: descreva no resumo para o `devops` atualizar o
+  `.env.example`.
+- Integrações externas (cotações) em `src/integrations/`, com timeout, retry e
+  cache, rodando em job, nunca na requisição.
+- Precisa mudar o schema? Descreva a mudança no resumo para o `database`.
 
 ## Antes de terminar
 

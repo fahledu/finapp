@@ -4,11 +4,14 @@
 
 ```
 <raiz do repositório>/
-  CLAUDE.md                 # contexto do projeto, lido automaticamente em toda sessão
+  CLAUDE.md                 # contexto do projeto e índice das regras, lido em toda sessão
   GUIA.md                   # este arquivo
-  docs/adr/                 # decisões de arquitetura (dinheiro, datas, moedas, divisão...)
+  docs/adr/                 # decisões de arquitetura: a fonte única das regras
+  docs/STATUS.md            # onde o projeto está e o próximo passo
+  scripts/check-docs.mjs    # confere se a documentação está consistente
+  .claude/settings.json     # bloqueia leitura de .env e roda o check-docs no fim da sessão
   .claude/agents/
-    architect.md            # planeja features (só escreve em docs/)
+    architect.md            # planeja features e escreve os ADRs (só escreve em docs/)
     database.md             # schema Prisma e migrations
     backend.md              # API Fastify
     frontend.md             # React
@@ -20,6 +23,8 @@
   .claude/hooks/
     guard-paths.mjs         # impede agentes de editar fora da sua área
     readonly-bash.mjs       # só deixa reviewer e security rodarem comandos de leitura
+    check-docs-on-stop.mjs  # impede encerrar com documentação inconsistente
+    hooks.test.mjs          # testes dos hooks (node --test)
 ```
 
 A pasta `.claude` começa com ponto e pode ficar oculta no explorador de arquivos.
@@ -30,6 +35,11 @@ Os hooks precisam do Node instalado; sem ele, as restrições não são aplicada
 **CLAUDE.md** é a "memória" do projeto. O Claude Code lê esse arquivo no início de
 cada sessão, então tudo que você não quer repetir (stack, comandos, regras) vai
 nele. Mantenha-o enxuto e atualizado; regra desatualizada atrapalha mais do que ajuda.
+
+**Fonte única.** Cada regra mora em um lugar só: o ADR do assunto. O CLAUDE.md
+tem uma linha de resumo por regra com o número do ADR; agentes e planos só
+citam o número. Assim, mudar uma regra é mudar um arquivo, e o
+`scripts/check-docs.mjs` avisa se alguma citação ficou apontando para o vazio.
 
 **Subagentes** são assistentes especializados. Cada arquivo em `.claude/agents/` tem:
 
@@ -77,32 +87,32 @@ Sua escolha (Node + TypeScript + React + PostgreSQL) é ótima. O que acrescente
 | Testes | Vitest, Testcontainers, Playwright, fast-check | Unitário, integração com banco real, e2e, e testes de propriedade para a divisão |
 | Infra | Docker Compose + GitHub Actions | Ambiente reproduzível e CI desde o começo |
 
-**Pontos do domínio que merecem atenção (e já estão no CLAUDE.md):**
+**Pontos do domínio que merecem atenção (regras nos ADRs):**
 
 - **Nunca use float para dinheiro.** `0.1 + 0.2 = 0.30000000000000004`. Guarde
-  centavos como inteiro.
+  centavos como inteiro (ADR 0001).
 - **Divisão de R$ 100 entre 3:** 33,33 + 33,33 + 33,33 = 99,99. O centavo que falta
-  precisa ir para alguém de forma previsível (maior resto).
+  precisa ir para alguém de forma previsível (maior resto, ADR 0007).
 - **Simplificação de dívidas:** se A deve 10 a B e B deve 10 a C, basta A pagar 10 a C.
   É o recurso mais "mágico" do Splitwise e um ótimo exercício de algoritmo.
-- **Múltiplas moedas:** decidido no ADR 0003. BRL, USD e EUR, uma moeda por
-  operação e sem câmbio na V1; totais de moedas diferentes nunca são somados.
+- **Múltiplas moedas:** ADR 0003 (sem câmbio na V1).
 - **Cotações:** para ativos da B3 existem APIs públicas como a brapi; para cripto,
   CoinGecko. Verifique limites e termos de uso de cada uma.
-- **LGPD:** dados financeiros são sensíveis. Planeje exportação e exclusão de conta.
+- **LGPD:** dados financeiros são sensíveis. Exportação e exclusão de conta: ADR 0012.
 - **Importação de extrato** (CSV/OFX dos bancos) é uma feature que agrega muito.
 
 ## 4. Roadmap sugerido (em ordem)
 
-1. Setup do monorepo, Docker, CI, auth (cadastro/login)
-2. Contas e categorias; categorias padrão copiadas para usuários novos e
-   existentes, saldo inicial (ADR 0021)
-3. Transações (CRUD, filtros por mês e categoria) e transferências (ADR 0019)
-4. Cartão de crédito e parcelamento (ADR 0020)
-5. Dashboard com saldo e gastos por categoria
-6. Grupos, membros e convites (ADR 0008)
-7. Despesas divididas (modo igual primeiro, depois os outros)
-8. Saldos entre membros, acertos e simplificação de dívidas (ADR 0030)
+1a. Fundação: monorepo, Docker, CI, `packages/shared` e a base técnica da API
+   (escrita, soft delete, erros, health) e do web (ADRs 0001, 0002, 0009, 0010, 0013, 0014)
+1b. Autenticação: cadastro, login, sessão, e-mail e tokens (ADR 0011)
+2. Contas e categorias, saldo inicial (ADR 0004)
+3. Transações (CRUD, filtros por mês e categoria) e transferências (ADR 0004)
+4. Cartão de crédito e parcelamento (ADR 0005)
+5. Dashboard com saldo e gastos por categoria (ADR 0008)
+6. Grupos, membros e convites (ADR 0006)
+7. Despesas divididas (modo igual primeiro, depois os outros) (ADR 0007)
+8. Saldos entre membros, acertos e simplificação de dívidas (ADR 0007)
 9. Orçamentos mensais por categoria
 10. Investimentos: ativos, operações de compra/venda, preço médio, posição
 11. Cotações automáticas e rentabilidade
@@ -113,46 +123,32 @@ Faça um item por vez, com commit ao final de cada um. O andamento fica em
 
 ## 5. Prompts prontos para usar no Claude Code
 
-### Primeira sessão: criar o projeto
+### Primeira sessão: fundação (roadmap 1a)
 
-Pré-requisitos: Node 24 LTS, pnpm (`corepack enable`) e Docker Desktop. Versões
-de todas as bibliotecas: ADR 0011 (instale sempre com o major explícito).
+Pré-requisitos: Node LTS, pnpm (`corepack enable`) e Docker Desktop. Versões: ADR 0015.
 
 ```
-Leia o CLAUDE.md e os ADRs em docs/adr/. Vamos criar o esqueleto do projeto do zero.
+Leia o CLAUDE.md e docs/STATUS.md. Vamos fazer o item 1a do roadmap (fundação).
 
-Use o agente devops para: estrutura do monorepo com pnpm workspaces e Turborepo,
-docker-compose com Postgres 18, Redis 8 e Mailpit, .env.example e workflow de CI básico
-(testes de integração com Testcontainers, matriz de fuso UTC e America/Sao_Paulo).
-Os scripts devem ter os nomes da seção "Comandos" do CLAUDE.md.
-
-Depois crie packages/shared com:
-- money.ts: SUPPORTED_CURRENCIES, currencySchema e moneySchema (ADRs 0001 e 0003),
-  parse de "1.234,56" para centavos, formatação, soma que recusa moedas diferentes
-- split.ts: divisão pelo maior resto com desempate por id (ADR 0004)
-- dates.ts: localDateSchema e todayInSaoPaulo() (ADR 0002)
-- testes com fast-check, incluindo a invariância à ordem dos participantes
-
-Depois use o agente database para criar o schema Prisma inicial com as tabelas
-de infraestrutura: user, session (ADR 0007), audit_log (ADR 0005) e
-idempotency_key (ADR 0006), a primeira migration e um seed mínimo.
-
-Depois use o agente backend para criar apps/api com Fastify, TypeScript strict,
-validação de variáveis de ambiente com Zod, formato de erro padrão
-(common/errors.ts), rota GET /api/health e um teste para ela (todas as rotas
-ficam sob /api, ADR 0013).
-
-Depois use o agente frontend para criar apps/web com Vite (com proxy de /api
-para a API, ADR 0007), React, Tailwind, shadcn/ui, TanStack Query e React Router,
-com uma página inicial simples que chama /api/health.
-
-Ao final, confirme que `pnpm dev`, `pnpm test`, `pnpm lint` e `pnpm typecheck`
-funcionam, remova a nota de status do topo do CLAUDE.md e me explique a
-estrutura criada como se eu estivesse aprendendo.
+1. Use o agente architect para criar docs/plans/fundacao.md a partir dos ADRs
+   citados no item 1a do GUIA: tudo que precisa existir antes da primeira
+   feature (estrutura do monorepo, packages/shared, tabelas e triggers de
+   infraestrutura, base de escrita e de erros da API, health, web mínimo, CI).
+   Sem cadastro e login (ficam no 1b). Pare e me mostre o plano.
 ```
 
-Cadastro e login ficam para a sessão seguinte, pelo fluxo padrão de feature
-(architect → database → backend → frontend → qa → reviewer → security).
+Depois de aprovar o plano:
+
+```
+Plano aprovado. Siga as tarefas com os agentes devops, database, backend,
+frontend e qa, nessa ordem, e depois o reviewer. Ao final, confirme que
+`pnpm dev`, `pnpm test`, `pnpm lint`, `pnpm typecheck` e
+`node scripts/check-docs.mjs` passam, remova a nota de status do topo do
+CLAUDE.md, atualize o docs/STATUS.md e me explique a estrutura criada como se
+eu estivesse aprendendo.
+```
+
+Depois, o item 1b (autenticação) segue o fluxo padrão de feature abaixo.
 
 ### Fluxo padrão de uma feature
 
@@ -205,6 +201,8 @@ Explique o que esse arquivo faz linha a linha: apps/api/src/modules/expenses/ser
 - **Commits frequentes.** Se algo der errado, você volta com `git`.
 - **Leia o que ele fez.** Você está estudando; peça explicações sempre que não
   entender algo. O agente docs e o reviewer ajudam nisso.
-- **Evolua os agentes.** Quando o Claude errar a mesma coisa duas vezes, adicione
-  uma regra no CLAUDE.md ou no agente responsável.
+- **Evolua as regras no lugar certo.** Quando o Claude errar a mesma coisa duas
+  vezes: se é regra do domínio, peça ao architect para pô-la no ADR do assunto
+  (e a linha de resumo no CLAUDE.md); se é jeito de trabalhar de um agente,
+  ajuste o arquivo dele. Nunca copie a mesma regra em dois lugares.
 - **`/clear` entre tarefas diferentes** para manter o contexto limpo.

@@ -1,7 +1,7 @@
-# 0011. Versões da stack e política de atualização
+# 0015. Versões da stack e política de atualização
 
 - Status: Aceito
-- Data: 2026-09-23
+- Data: 2026-09-24
 
 ## Contexto
 
@@ -43,6 +43,19 @@ Consulta ao npm e ao nodejs.org em 2026-09-23 mostrou duas armadilhas:
 | Gráficos | recharts | 3 |
 | Testes | vitest, @playwright/test, fast-check, testcontainers, supertest | 5, 1, 4, 12, 7 |
 | Decimais | decimal.js | 10 |
+| Zod ↔ Fastify | fastify-type-provider-zod | conferir na instalação (compatível com Zod 4 e Fastify 5) |
+| OpenAPI | @fastify/swagger | conferir na instalação |
+| Rate limit | @fastify/rate-limit | conferir na instalação |
+| Cookie | @fastify/cookie | conferir na instalação |
+| Headers de segurança | @fastify/helmet | conferir na instalação |
+| Arquivos estáticos | @fastify/static | conferir na instalação |
+| E-mail | nodemailer | conferir na instalação |
+| Logs | pino | conferir na instalação (a mesma major que o Fastify 5 usa) |
+
+"Conferir na instalação": o major é escolhido ao instalar (a última estável
+compatível com o resto da tabela) e fica fixado no lockfile; quem instala
+registra o número nesta tabela. Os plugins `@fastify/*` devem declarar suporte ao
+Fastify 5.
 
 **Regras**
 
@@ -66,6 +79,8 @@ Consulta ao npm e ao nodejs.org em 2026-09-23 mostrou duas armadilhas:
 - Tailwind 4: configuração em CSS (`@import "tailwindcss"`, `@theme`), plugin do Vite.
 - React Router 8: usar como biblioteca de rotas numa SPA; não usar o modo
   framework (SSR/loaders no servidor), porque a API é o Fastify.
+- `fastify-type-provider-zod`: se não houver versão compatível com Zod 4, a
+  alternativa é o `z.toJSONSchema()` nativo (ADR [0013](0013-convencoes-de-api.md)).
 
 ## Consequências
 

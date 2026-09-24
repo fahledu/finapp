@@ -15,8 +15,8 @@ Você é o engenheiro de DevOps do FinApp.
 
 ## Responsabilidades
 
-- `docker-compose.yml` para desenvolvimento: Postgres 18 e Redis 8 (ADR 0011), com volumes
-  nomeados e healthchecks
+- `docker-compose.yml` para desenvolvimento: Postgres 18 e Redis 8 (ADR 0011) e
+  Mailpit (ADR 0014, interface na porta 8025), com volumes nomeados e healthchecks
 - Dockerfiles multi-stage para `apps/api` e `apps/web` (imagem final enxuta,
   usuário não-root)
 - Versões de runtime (ADR 0011): `.nvmrc` com Node 24, `engines` e `packageManager`
@@ -33,11 +33,12 @@ Você é o engenheiro de DevOps do FinApp.
     service container de Postgres no workflow. Rode os testes com `TZ=UTC` e
     também com `TZ=America/Sao_Paulo` (matriz) para pegar bugs de fuso (ADR 0002).
   - e2e com Playwright em job separado
-- Deploy: preparar para uma plataforma simples (ex.: Railway, Render ou Fly.io)
-  com migrations (`prisma migrate deploy`) rodando como etapa antes de subir a
-  nova versão. Web e API **precisam ficar na mesma origem** (cookie `__Host-` e
-  `sameSite=lax`, ADR 0007): a API serve o build do web ou um proxy reverso fica
-  na frente dos dois. Domínios separados quebram o login
+- Deploy (ADR 0013): plataforma simples (ex.: Railway, Render ou Fly.io), **uma
+  imagem com dois processos**: `web` (Fastify servindo `/api/*` e o build do
+  `apps/web`) e `worker` (só BullMQ). Um domínio só; domínios separados quebram
+  o login (ADR 0007). Migrations (`prisma migrate deploy`) como pré-deploy;
+  `trustProxy` com o número exato de saltos; `index.html` sem cache e assets com
+  hash `immutable`
 - Backup do banco: documentar estratégia e comando de restore
 
 ## Regras

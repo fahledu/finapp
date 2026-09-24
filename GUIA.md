@@ -95,18 +95,21 @@ Sua escolha (Node + TypeScript + React + PostgreSQL) é ótima. O que acrescente
 ## 4. Roadmap sugerido (em ordem)
 
 1. Setup do monorepo, Docker, CI, auth (cadastro/login)
-2. Contas e categorias
-3. Transações (CRUD, filtros por mês e categoria)
-4. Dashboard com saldo e gastos por categoria
-5. Grupos e membros
-6. Despesas divididas (modo igual primeiro, depois os outros)
-7. Saldos entre membros, acertos e simplificação de dívidas
-8. Orçamentos mensais por categoria
-9. Investimentos: ativos, operações de compra/venda, preço médio, posição
-10. Cotações automáticas e rentabilidade
-11. Recorrências e importação de extrato
+2. Contas e categorias; categorias padrão copiadas para usuários novos e
+   existentes, saldo inicial (ADR 0021)
+3. Transações (CRUD, filtros por mês e categoria) e transferências (ADR 0019)
+4. Cartão de crédito e parcelamento (ADR 0020)
+5. Dashboard com saldo e gastos por categoria
+6. Grupos, membros e convites (ADR 0008)
+7. Despesas divididas (modo igual primeiro, depois os outros)
+8. Saldos entre membros, acertos e simplificação de dívidas (precisa de ADR antes)
+9. Orçamentos mensais por categoria
+10. Investimentos: ativos, operações de compra/venda, preço médio, posição
+11. Cotações automáticas e rentabilidade
+12. Recorrências e importação de extrato
 
-Faça um item por vez, com commit ao final de cada um.
+Faça um item por vez, com commit ao final de cada um. O andamento fica em
+`docs/STATUS.md`.
 
 ## 5. Prompts prontos para usar no Claude Code
 
@@ -119,7 +122,7 @@ de todas as bibliotecas: ADR 0011 (instale sempre com o major explícito).
 Leia o CLAUDE.md e os ADRs em docs/adr/. Vamos criar o esqueleto do projeto do zero.
 
 Use o agente devops para: estrutura do monorepo com pnpm workspaces e Turborepo,
-docker-compose com Postgres 18 e Redis 8, .env.example e workflow de CI básico
+docker-compose com Postgres 18, Redis 8 e Mailpit, .env.example e workflow de CI básico
 (testes de integração com Testcontainers, matriz de fuso UTC e America/Sao_Paulo).
 Os scripts devem ter os nomes da seção "Comandos" do CLAUDE.md.
 
@@ -136,11 +139,12 @@ idempotency_key (ADR 0006), a primeira migration e um seed mínimo.
 
 Depois use o agente backend para criar apps/api com Fastify, TypeScript strict,
 validação de variáveis de ambiente com Zod, formato de erro padrão
-(common/errors.ts), rota GET /health e um teste para ela.
+(common/errors.ts), rota GET /api/health e um teste para ela (todas as rotas
+ficam sob /api, ADR 0013).
 
 Depois use o agente frontend para criar apps/web com Vite (com proxy de /api
 para a API, ADR 0007), React, Tailwind, shadcn/ui, TanStack Query e React Router,
-com uma página inicial simples que chama /health.
+com uma página inicial simples que chama /api/health.
 
 Ao final, confirme que `pnpm dev`, `pnpm test`, `pnpm lint` e `pnpm typecheck`
 funcionam, remova a nota de status do topo do CLAUDE.md e me explique a

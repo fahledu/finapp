@@ -1,6 +1,6 @@
 # 0018. Despesas de grupo e finanças pessoais
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto
@@ -17,7 +17,7 @@ como eles se relacionam:
 Contar errado distorce dashboard e orçamentos; sincronizar automaticamente cria
 problemas de edição e exclusão (quem edita a despesa altera a transação de outro?).
 
-## Decisão (recomendada)
+## Decisão
 
 **V1: domínios separados, com vínculo opcional e explícito.**
 

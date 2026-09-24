@@ -1,16 +1,16 @@
 # 0014. Envio de e-mail e tokens de uso único
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto
 
 Vários fluxos já decididos ou previstos dependem de e-mail, mas a stack não tem
 serviço de envio: recuperação de senha (agente security), link para cancelar a
-exclusão de conta (ADR 0005), confirmação de e-mail e convites (ADR 0023). Todos
+exclusão de conta (ADR 0010), confirmação de e-mail e convites (ADR 0008). Todos
 precisam de um token de uso único com as mesmas garantias.
 
-## Decisão (recomendada)
+## Decisão
 
 **Envio**
 
@@ -37,7 +37,7 @@ precisam de um token de uso único com as mesmas garantias.
 - O token vai no link como parâmetro; a página faz `POST` com ele (GET nunca altera nada).
 
 **Confirmação de e-mail:** o cadastro envia verificação; o login funciona antes de
-confirmar, mas aceitar convite por e-mail exige e-mail confirmado (ADR 0023).
+confirmar, mas aceitar convite por e-mail exige e-mail confirmado (ADR 0008).
 
 ## Consequências
 

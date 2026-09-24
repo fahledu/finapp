@@ -44,7 +44,7 @@ por todos os schemas. Código fora da lista → `422 VALIDATION_ERROR`.
 
 **Evolução prevista** (cada etapa com ADR próprio, quando houver necessidade real):
 
-1. **Conversão para exibição** (junto com cotações, roadmap item 10): patrimônio
+1. **Conversão para exibição** (junto com cotações, roadmap item 11): patrimônio
    consolidado em BRL usando a taxa do dia (ex.: PTAX do Banco Central). Só leitura,
    nada é gravado nas operações.
 2. **Conversão gravada na operação:** despesa em moeda diferente da do grupo, com

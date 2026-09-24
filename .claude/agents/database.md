@@ -32,16 +32,18 @@ Você é o especialista em PostgreSQL e Prisma do FinApp.
   (ex.: `amount_cents > 0`, `currency ~ '^[A-Z]{3}$'`).
 - Unicidade que deve ignorar registros com soft delete: índice parcial
   (`CREATE UNIQUE INDEX ... WHERE deleted_at IS NULL`) (ADR 0005).
-- Para divisão de gastos: `expense` (total, pagador, grupo) e `expense_share`
-  (membro do grupo, valor da parte). Partes e acertos referenciam
-  `group_member.id`, nunca `user.id` (ADR 0008). A soma das partes = total deve
-  ser garantida no service e verificada em teste. `expense_share.amount_cents`
-  também tem `CHECK (amount_cents > 0)` (ADR 0009).
+- Para divisão de gastos (ADR 0004): `expense` (total, grupo; **sem** coluna de
+  pagador), `expense_payment` (membro que pagou, valor) e `expense_share` (membro,
+  valor da parte). Partes, pagamentos e acertos referenciam `group_member.id`,
+  nunca `user.id` (ADR 0008). Somas = total garantidas no service e verificadas
+  em teste; `amount_cents` com `CHECK (amount_cents > 0)` nas duas tabelas.
 - Exclusão de conta: a linha de `user` nunca é apagada; vira lápide anonimizada
   (`status = 'DELETED'`), porque autoria e `audit_log` apontam para ela (ADR 0010).
-- Tabelas de infraestrutura definidas em ADR: `audit_log` (0005),
-  `idempotency_key` (0006), `session` (0007), `group_member` (0008). Siga as
-  colunas do ADR; se precisar divergir, avise.
+- E-mail de usuário: índice único em `lower(email)` (ADR 0007).
+- Tabelas definidas em ADR: `audit_log` (0005), `idempotency_key` (0006),
+  `session` (0007), `group_member` e `group_invite` (0008), `user_token` (0014),
+  `transfer` (0019), `installment_plan` (0020). Siga as colunas do ADR; se
+  precisar divergir, avise.
 
 ## SQL que o Prisma não gera
 

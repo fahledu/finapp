@@ -12,43 +12,49 @@ linha de status.
 architect o considera ao planejar a feature relacionada e pede a decisão (aceitar,
 ajustar ou descartar) antes de seguir.
 
+**Linha de base (2026-09-24).** Antes de existir código, os ADRs foram
+consolidados: cada assunto ficou em um arquivo só, sem cadeias de complementos.
+Foi uma exceção única; a partir daqui, a imutabilidade acima vale sem exceção.
+
 | # | Título | Status |
 |---|---|---|
 | [0001](0001-representacao-de-dinheiro.md) | Representação de dinheiro, decimais e porcentagens | Aceito |
 | [0002](0002-datas-e-fusos.md) | Datas, instantes e fuso horário | Aceito |
 | [0003](0003-moedas.md) | Suporte a moedas na V1 | Aceito |
-| [0004](0004-algoritmo-de-divisao.md) | Algoritmo de divisão de gastos | Aceito, complementado por 0009 |
-| [0005](0005-soft-delete-auditoria-lgpd.md) | Soft delete, auditoria e exclusão de conta (LGPD) | Aceito, complementado por 0010 |
+| [0004](0004-despesas-de-grupo.md) | Despesas de grupo: divisão, pagadores e saldos | Aceito |
+| [0005](0005-soft-delete-e-auditoria.md) | Soft delete e auditoria | Aceito |
 | [0006](0006-idempotencia.md) | Idempotência de operações financeiras | Aceito |
-| [0007](0007-sessoes.md) | Sessões e proteção CSRF | Aceito |
-| [0008](0008-membros-de-grupo.md) | Membros de grupo e participantes sem conta | Aceito, complementado por 0010 |
-| [0009](0009-partes-de-divisao-positivas.md) | Partes de divisão sempre positivas | Aceito |
-| [0010](0010-registro-de-usuario-apos-expurgo.md) | Registro de usuário após o expurgo | Aceito |
+| [0007](0007-sessoes-e-autenticacao.md) | Sessões, CSRF e proteção de autenticação | Aceito |
+| [0008](0008-grupos-membros-e-convites.md) | Grupos: membros e convites | Aceito |
+| [0010](0010-exclusao-de-conta-lgpd.md) | Exclusão de conta (LGPD) | Aceito |
 | [0011](0011-versoes-da-stack.md) | Versões da stack e política de atualização | Aceito |
-| [0012](0012-soft-delete-em-relacoes-e-escritas.md) | Soft delete em relações, escritas e SQL cru | Proposto |
-| [0013](0013-topologia-de-deploy.md) | Topologia de deploy: mesma origem | Proposto |
-| [0014](0014-envio-de-email-e-tokens.md) | Envio de e-mail e tokens de uso único | Proposto |
-| [0015](0015-protecao-de-autenticacao.md) | Proteção de autenticação: e-mail, senha e rate limit | Proposto |
-| [0016](0016-idempotencia-detalhes.md) | Idempotência: comparação, concorrência e expiração | Proposto |
-| [0017](0017-expurgo-lgpd-auditoria-e-posse-de-grupo.md) | Expurgo LGPD: dados pessoais na auditoria e posse de grupo | Proposto |
-| [0018](0018-despesas-de-grupo-e-financas-pessoais.md) | Despesas de grupo e finanças pessoais | Proposto |
-| [0019](0019-transferencias-entre-contas.md) | Transferências entre contas | Proposto |
-| [0020](0020-cartao-de-credito-e-parcelamento.md) | Cartão de crédito e compras parceladas | Proposto |
-| [0021](0021-saldo-inicial-e-categorias.md) | Saldo inicial de conta e categorias padrão | Proposto |
-| [0022](0022-multiplos-pagadores.md) | Despesa com mais de um pagador | Proposto |
-| [0023](0023-convites-de-grupo.md) | Convites de grupo e vínculo de membro sem conta | Proposto |
+| [0013](0013-topologia-de-deploy.md) | Topologia de deploy: mesma origem | Aceito |
+| [0014](0014-envio-de-email-e-tokens.md) | Envio de e-mail e tokens de uso único | Aceito |
+| [0018](0018-despesas-de-grupo-e-financas-pessoais.md) | Despesas de grupo e finanças pessoais | Aceito |
+| [0019](0019-transferencias-entre-contas.md) | Transferências entre contas | Aceito |
+| [0020](0020-cartao-de-credito-e-parcelamento.md) | Cartão de crédito e compras parceladas | Aceito |
+| [0021](0021-saldo-inicial-e-categorias.md) | Saldo inicial de conta e categorias padrão | Aceito |
+
+**Números aposentados** (incorporados na consolidação; nunca reutilize):
+0009 e 0022 → 0004 · 0012 → 0005 · 0016 → 0006 · 0015 → 0007 · 0023 → 0008 ·
+0017 → 0010. O próximo ADR novo é o **0024**. O conteúdo antigo está no histórico
+do git.
 
 ## Decisões ainda sem ADR
 
-Precisam de ADR quando a feature correspondente for planejada:
+Precisam de ADR quando a feature correspondente for planejada. Questões menores
+e pontos cegos conhecidos estão em [`docs/STATUS.md`](../STATUS.md).
 
-- **Investimentos (roadmap 9):** eventos societários (desdobramento, grupamento,
+- **Acertos e simplificação de dívidas (roadmap 8):** acerto parcial ou acima da
+  dívida, acerto com membro sem conta, quem registra, desempate determinístico da
+  simplificação.
+- **Investimentos (roadmap 10):** eventos societários (desdobramento, grupamento,
   bonificação), proventos (dividendos, JCP) e método de preço médio.
-- **Orçamentos (roadmap 8):** moeda do orçamento e se a parte em despesas de grupo
+- **Orçamentos (roadmap 9):** moeda do orçamento e se a parte em despesas de grupo
   conta (ver 0018).
-- **Recorrências (roadmap 11):** idempotência do job (não gerar a mesma ocorrência
+- **Recorrências (roadmap 12):** idempotência do job (não gerar a mesma ocorrência
   duas vezes), fuso do agendamento (ADR 0002) e edição de série.
-- **Importação de extrato (roadmap 11):** deduplicação por `FITID` (OFX) ou hash
+- **Importação de extrato (roadmap 12):** deduplicação por `FITID` (OFX) ou hash
   de linha (CSV), limites de arquivo e revisão antes de gravar.
 - **Câmbio:** as duas etapas previstas no ADR 0003.
 

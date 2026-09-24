@@ -20,8 +20,11 @@ financeiros e pessoais, então está sujeito à LGPD e é alvo atraente.
 - Senhas com argon2id; nunca logadas nem retornadas
 - Cookie de sessão conforme ADR 0007: `httpOnly`, `sameSite=lax`, `path=/`; em
   produção `secure` e nome `__Host-sid`. Token guardado só como SHA-256
-- Rotação de sessão no login; invalidação no logout e troca de senha
-- Rate limit em login, cadastro e recuperação de senha
+- Rotação de sessão no login; invalidação no logout, troca e reset de senha
+- Rate limit, e-mail normalizado, parâmetros do argon2id e resposta sem revelar
+  se a conta existe, conforme ADR 0007
+- Tokens de uso único (reset, verificação, convite) só como hash, com validade e
+  `used_at` (ADRs 0008 e 0014)
 - Proteção CSRF nas mutações
 
 **Autorização**
@@ -38,14 +41,15 @@ financeiros e pessoais, então está sujeito à LGPD e é alvo atraente.
   execução de conteúdo
 - Headers de segurança via `@fastify/helmet`
 - Sem CORS: web e API ficam na mesma origem (proxy do Vite em dev, mesma origem em
-  produção, ADR 0007). Se aparecer `@fastify/cors`, `Access-Control-Allow-Credentials`
+  produção, ADR 0013). Se aparecer `@fastify/cors`, `Access-Control-Allow-Credentials`
   ou `origin: true`/`*`, é achado. Mutações checam `Origin` contra `WEB_ORIGIN` e
   exigem `Content-Type: application/json`
 
 **Dados e segredos**
 - Segredos só em variáveis de ambiente, nunca commitados; `.env` no `.gitignore`
 - Logs sem dados sensíveis
-- LGPD: existe forma de exportar e excluir os dados do usuário?
+- LGPD: existe forma de exportar e excluir os dados do usuário? O expurgo segue o
+  ADR 0010, e snapshots de `audit_log` não guardam dado pessoal (ADR 0005)
 
 **Dependências**
 - Rode `pnpm audit` e aponte vulnerabilidades altas e críticas

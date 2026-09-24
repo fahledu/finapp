@@ -1,6 +1,6 @@
 # 0013. Topologia de deploy: mesma origem
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto
@@ -12,7 +12,7 @@ com domínio próprio: o navegador deixa de enviar o cookie e o login quebra. O
 BullMQ também precisa de um processo worker, e as migrations precisam rodar antes
 da versão nova.
 
-## Decisão (recomendada)
+## Decisão
 
 - **Uma imagem, dois processos:**
   - `web`: Fastify servindo a API sob `/api/*` e o build estático do `apps/web`

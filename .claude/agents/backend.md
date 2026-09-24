@@ -42,9 +42,14 @@ apps/api/src/modules/<modulo>/
   ordem prevista é igual → valor exato → porcentagem → cotas. O algoritmo é a
   função pura de `packages/shared/src/split.ts`; sobra de centavos pelo maior
   resto, desempate pelo id do membro do grupo em ordem crescente. Parte zero
-  → `422 SPLIT_SHARE_ZERO`, validada antes de gravar (ADR 0009).
+  → `422 SPLIT_SHARE_ZERO`, validada antes de gravar. Pagadores em
+  `expense_payment` (V1: um só), soma = total.
 - Soft delete e auditoria (ADR 0005): use o client Prisma com a extensão de soft
-  delete; grave o `audit_log` na mesma `$transaction` da alteração.
+  delete; relações com `where: notDeleted`; exclusão só por `softDelete()`;
+  `prismaUnfiltered` só em auditoria, exportação e expurgo. Grave o `audit_log`
+  (snapshot via `toAuditSnapshot()`, sem dado pessoal) na mesma `$transaction`.
+- Todas as rotas ficam sob `/api` (ADR 0013). Auth segue o ADR 0007 (normalização
+  de e-mail, argon2id, rate limit no Redis); e-mail por `EmailSender` + job (ADR 0014).
 - Moedas (ADR 0003): moeda diferente da conta/grupo/ativo → `CURRENCY_MISMATCH`.
 - Cálculo de saldos entre membros e simplificação de dívidas ficam em funções
   puras e testadas isoladamente.

@@ -1,6 +1,6 @@
 # 0021. Saldo inicial de conta e categorias padrão
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto
@@ -11,7 +11,7 @@ sempre positivos com direção por `type` (ADR 0001), um campo de saldo com sina
 quebraria a regra. Também não está decidido se categorias são globais ou do
 usuário, nem o que acontece ao apagar uma categoria em uso.
 
-## Decisão (recomendada)
+## Decisão
 
 **Saldo inicial**
 

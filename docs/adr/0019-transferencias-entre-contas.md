@@ -1,6 +1,6 @@
 # 0019. Transferências entre contas
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto
@@ -10,7 +10,7 @@ transferência mexe em duas contas: sai de uma e entra em outra. Não está deci
 se é uma linha ou duas, como fica a direção sem usar sinal, nem o que fazer com
 contas de moedas diferentes (sem câmbio na V1, ADR 0003).
 
-## Decisão (recomendada)
+## Decisão
 
 - Tabela `transfer`: `id`, `user_id`, `from_account_id`, `to_account_id`,
   `amount_cents`, `currency`, `date` (competência), `description`, `deleted_at`.

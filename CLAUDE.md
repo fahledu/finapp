@@ -7,6 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 > **Status:** o repositório ainda não tem código. Stack, estrutura e comandos abaixo
 > são o alvo a construir (ver roadmap em `GUIA.md`). Ao criar o esqueleto, garantir
 > que os scripts `pnpm` listados em "Comandos" existam com esses nomes, e remover esta nota.
+> **Para retomar o trabalho, leia `docs/STATUS.md`** (fase atual, próximo passo, pendências).
 
 Sistema web para controlar finanças pessoais (contas, transações, orçamentos),
 acompanhar investimentos (carteira, cotações, rentabilidade) e dividir gastos
@@ -30,7 +31,10 @@ de produção.
 - **Testes:** Vitest 5, Supertest, Testcontainers (Postgres real), Playwright (e2e),
   fast-check (testes de propriedade para `money.ts` e divisão)
 - **Lint:** ESLint 10 + typescript-eslint (flat config)
-- **Infra local:** Docker Compose (`postgres:18-alpine` + `redis:8-alpine`)
+- **E-mail:** `nodemailer` via SMTP; Mailpit em dev (ADR 0014)
+- **Infra local:** Docker Compose (`postgres:18-alpine` + `redis:8-alpine` + Mailpit)
+- **Deploy:** uma imagem, processos `web` (API sob `/api` + build do front) e
+  `worker` (BullMQ), mesma origem (ADR 0013)
 
 ## Estrutura
 
@@ -97,17 +101,20 @@ plano e pede decisão antes de implementar.
    Centavos que sobram vão pelo maior resto; empate decidido pelo id do membro do
    grupo em ordem crescente, então o resultado não depende da ordem de entrada.
    Nenhuma parte pode ser zero: rejeite com `422 SPLIT_SHARE_ZERO`.
-   Existe teste para isso; não quebre. (ADRs 0004 e 0009)
+   Pagamentos ficam em `expense_payment` (soma = total). Existe teste para isso;
+   não quebre. (ADR 0004)
 4. **Datas:** instantes em `timestamptz` (UTC), ISO 8601 no JSON. Data de
    competência é `DATE` e trafega como string `"YYYY-MM-DD"`, nunca como `Date`
    fora do repository. "Hoje" é calculado em `America/Sao_Paulo`. (ADR 0002)
 5. **Toda query filtra pelo dono.** Nenhum usuário pode ler ou alterar dados de
    outro. Em grupos, verificar se o usuário é membro **ativo**. (ADR 0008)
-6. **Nada é apagado de verdade** em transações, despesas e acertos: usar soft delete
-   (`deletedAt`) e registrar em `audit_log` na mesma transação. Única exceção: o
-   expurgo de exclusão de conta (LGPD), que segue o ADR 0005.
-7. Operações que criam dinheiro (transação, despesa, acerto) aceitam header
-   `Idempotency-Key` para evitar duplicidade. (ADR 0006)
+6. **Nada é apagado de verdade** em transações, transferências, parcelamentos,
+   despesas (com partes e pagamentos) e acertos: usar soft delete (`deletedAt`,
+   extensão Prisma + `notDeleted` em relações) e registrar em `audit_log` na mesma
+   transação. (ADR 0005) Única exceção: o expurgo de exclusão de conta (LGPD),
+   que segue o ADR 0010.
+7. Operações que criam dinheiro (transação, transferência, parcelamento, despesa,
+   acerto) aceitam header `Idempotency-Key` para evitar duplicidade. (ADR 0006)
 8. **Moedas aceitas: `BRL`, `USD`, `EUR`** (`SUPPORTED_CURRENCIES` em
    `packages/shared`), todas com 2 casas decimais; nunca aceite código ISO
    arbitrário. **Uma moeda por operação.** Conta, grupo e ativo têm moeda própria; enviar
@@ -124,7 +131,7 @@ plano e pede decisão antes de implementar.
   Status: entrada inválida (Zod) → `422 VALIDATION_ERROR`; JSON malformado → `400`;
   sem sessão → `401`; recurso inexistente **ou de outro usuário** → `404`; sem
   permissão num recurso visível (ex.: membro não-OWNER) → `403`; conflito de
-  estado → `409`. O handler global converte os erros do Fastify para esse formato.
+  estado → `409`; convite inválido → `410`; rate limit → `429`. O handler global converte os erros do Fastify para esse formato.
 - Frontend: dados do servidor via TanStack Query; estado local com `useState`. Sem Redux.
 - Formatação de moeda e datas sempre com `Intl` em `pt-BR`.
 - Commits no padrão Conventional Commits (`feat:`, `fix:`, `chore:`...).
@@ -154,3 +161,4 @@ leitura. Se um hook bloquear, não contorne: delegue ao agente responsável.
 - `pnpm lint`, `pnpm typecheck` e os testes afetados passam
 - Nenhum `console.log` esquecido, nenhum segredo no código
 - Migrations novas foram geradas pelo Prisma, não editadas à mão depois de aplicadas
+- `docs/STATUS.md` atualizado se um item do roadmap terminou ou uma questão foi resolvida

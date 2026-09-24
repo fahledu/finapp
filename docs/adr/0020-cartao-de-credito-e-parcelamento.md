@@ -1,6 +1,6 @@
 # 0020. Cartão de crédito e compras parceladas
 
-- Status: Proposto
+- Status: Aceito
 - Data: 2026-09-23
 
 ## Contexto
@@ -10,7 +10,7 @@ No Brasil, boa parte dos gastos passa pelo cartão de crédito, muitos parcelado
 uma conta comum, a fatura não existe e o parcelamento é lançado à mão, com erro de
 centavos (R$ 100 em 3x).
 
-## Decisão (recomendada)
+## Decisão
 
 **Tipo de conta:** `account.kind` (`CHECKING`, `SAVINGS`, `CASH`, `CREDIT_CARD`).
 Cartão tem `closing_day` e `due_day` (1 a 31; em meses mais curtos, vale o último dia).
@@ -42,7 +42,7 @@ Cartão tem `closing_day` e `due_day` (1 a 31; em meses mais curtos, vale o últ
 
 ## Consequências
 
-- Precisa entrar no roadmap antes de "Dashboard" (item 4) para os números fazerem
+- Entra no roadmap antes do "Dashboard" (itens 4 e 5 do GUIA) para os números fazerem
   sentido para quem usa cartão; ou ser explicitamente adiado.
 - Juros de parcelamento e estorno de compra ficam fora (estorno já está fora da V1, ADR 0001).
 

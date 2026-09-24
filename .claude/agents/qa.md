@@ -38,11 +38,22 @@ quebrado, não confirmar que está tudo certo.
 - Mesma `Idempotency-Key`: repetição não duplica; corpo diferente → `422`;
   duas requisições simultâneas criam um único registro (ADR 0006)
 - Transação criada às 22h de Brasília mantém a data de competência local (ADR 0002)
+- Parcelas: R$ 100 em 3x = 3334 + 3333 + 3333; total menor que a quantidade →
+  `422 INSTALLMENT_SHARE_ZERO` (ADR 0029)
+- Relatórios excluem transferência, saldo inicial, acerto e apagado; compra no
+  cartão conta no mês da fatura (ADRs 0028 e 0029)
+- Despesa ou acerto com membro `LEFT` → `409 MEMBER_NOT_ACTIVE` (ADR 0030)
+- `DELETE` físico ou `UPDATE` em `audit_log` sem a flag do expurgo falham (ADR 0027)
+- Login bem-sucedido não consome cota; pedido de reset não invalida link anterior (ADR 0033)
 
 Use property-based testing (fast-check) para os algoritmos de divisão (ADR 0004):
 - a soma das partes é igual ao total, para qualquer total e conjunto de pesos;
 - nenhuma parte difere da parte ideal em 1 centavo ou mais;
 - embaralhar a ordem dos participantes não muda a parte de ninguém.
+
+E também para `splitEvenly` (soma = total, diferença ≤ 1, não crescente) e para a
+simplificação de dívidas (aplicar as sugestões zera os saldos, no máximo `n − 1`
+transferências, invariância à ordem) (ADRs 0029 e 0030).
 
 Os centavos que sobram vão para os maiores restos com desempate pelo id do
 membro; não escreva testes que assumam "o primeiro da lista recebe o centavo".

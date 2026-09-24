@@ -39,7 +39,12 @@ Você é o engenheiro de DevOps do FinApp.
   o login (ADR 0007). Migrations (`prisma migrate deploy`) como pré-deploy;
   `trustProxy` com o número exato de saltos; `index.html` sem cache e assets com
   hash `immutable`
-- Backup do banco: documentar estratégia e comando de restore
+- Backup do banco (ADR 0032): diários, retenção de no máximo 30 dias (prefira
+  28). Runbook de restore: restaurar, rodar o job de expurgo LGPD **antes** de
+  liberar tráfego e avisar contas cujo cancelamento de exclusão foi desfeito
+- Logs com retenção de 30 dias na plataforma (ADR 0032)
+- O `worker` roda a varredura do outbox a cada minuto (ADR 0031)
+- `API_DOCS_ENABLED` no `.env.example`, `false` em produção (ADR 0026)
 
 ## Regras
 

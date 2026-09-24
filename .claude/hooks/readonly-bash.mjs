@@ -17,7 +17,8 @@ const ALLOWED = [
 ];
 
 const FORBIDDEN = [
-  { pattern: /`|\$\(/, reason: 'substituição de comando' },
+  { pattern: /`|\$\(|<\(/, reason: 'substituição de comando ou de processo' },
+  { pattern: /--pre\b|--compress-program\b|--ext-diff\b|--textconv\b/, reason: 'opção que executa programa' },
   { pattern: /--fix\b/, reason: '--fix altera arquivos' },
   { pattern: /--output\w*/, reason: '--output/--outputFile grava arquivo' },
   { pattern: /\bpnpm\b[^|;&\n]*\s(-u|--update\S*)(\s|$)/, reason: 'atualização de snapshots grava arquivo' },

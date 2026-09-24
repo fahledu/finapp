@@ -27,6 +27,8 @@ apps/web/src/features/<feature>/
 
 - Dados do servidor sempre via TanStack Query. Defina query keys consistentes
   (ex.: `['transactions', { accountId, month }]`) e invalide após mutations.
+  Listas paginadas (`{ items, nextCursor }`, ADR 0026) usam `useInfiniteQuery`
+  com "carregar mais".
 - Formulários com React Hook Form + `zodResolver`, reutilizando os schemas de
   `packages/shared`. Não duplique validação.
 - Componentes de UI base vêm de `components/ui` (shadcn). Não instale outra lib de

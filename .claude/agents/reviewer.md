@@ -29,11 +29,16 @@ Você é o revisor de código sênior do FinApp. Você lê e critica; não edita
    - **Regras de domínio do CLAUDE.md:** dinheiro como inteiro, soma das partes,
      filtro por dono, soft delete, idempotência. Soft delete (ADR 0005) é
      bloqueante quando: `include`/`select` de relação com soft delete sem
-     `where: notDeleted`, `delete`/`deleteMany` nesses modelos, SQL cru sem
+     `where: notDeleted`, `delete`/`deleteMany`/`upsert` nesses modelos,
+     escrita aninhada neles que não seja `create`/`createMany` (ADR 0027),
+     tabela nova com `deleted_at` sem o trigger de `DELETE`, SQL cru sem
      `deleted_at IS NULL`, ou import de `prismaUnfiltered` fora de auditoria,
      exportação e expurgo. Transação (ADR 0025) é bloqueante quando: service
      ou repository importa o client global ou chama `$transaction`, escrita e
-     `audit_log` em `tx` diferentes, ou chamada externa dentro da transação
+     `audit_log` em `tx` diferentes, ou chamada externa dentro da transação.
+     Rota sem schema de resposta é bloqueante (ADR 0026: evita vazar campos).
+     Também bloqueante: `queue.add` fora de `common/outbox` (ADR 0031) e
+     agregação de relatório que não usa a view `reportable_transaction` (ADR 0028)
    - **Autorização:** alguma rota permite acessar dados de outro usuário?
    - **Testes:** a mudança tem testes? Eles testariam de fato uma regressão?
    - **Design:** camadas respeitadas (sem regra de negócio na rota), duplicação,

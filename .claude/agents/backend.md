@@ -29,13 +29,29 @@ apps/api/src/modules/<modulo>/
 
 - Valide toda entrada com os schemas Zod de `packages/shared`. Se o schema não
   existir, crie-o lá primeiro para que o frontend reutilize.
+- Convenções de API (ADR 0026): `fastify-type-provider-zod` com schema de `body`,
+  `querystring`, `params` **e resposta** em toda rota; listas que crescem com
+  cursor (`{ items, nextCursor }`, limite 50/100) e ordenação fixa; filtros de
+  período `from`/`to` (`to` exclusivo) ou `month`.
 - Autorização em toda rota: o usuário só acessa os próprios dados; em grupos,
   verifique membresia no repository ou num guard reutilizável.
 - Transação (ADR 0025): a rota abre a transação com `withIdempotency(request, input, (tx) => ...)`
   (operações que criam dinheiro) ou `runInTransaction((tx) => ...)` (demais
   escritas). Service e repository recebem `tx: Db` como primeiro parâmetro e nunca
   importam o client global nem chamam `$transaction`. Nada de e-mail ou API
-  externa dentro da transação: enfileire um job depois do commit.
+  externa dentro da transação: grave o job com `outbox.add(tx, ...)` (ADR 0031);
+  `queue.add` direto só em `common/outbox` e nos jobs agendados.
+- Agregações (relatórios, dashboard, orçamentos) só pela view
+  `reportable_transaction`, com `$queryRaw` tipado por Zod e filtro de `user_id`
+  (ADR 0028). Moeda e `kind` de conta travam após o primeiro lançamento; conta
+  arquivada recusa lançamento novo, edição e exclusão (`409`).
+- Grupos (ADR 0030): despesa ou acerto com membro `LEFT` → `409 MEMBER_NOT_ACTIVE`;
+  simplificação de dívidas é leitura (`settle.ts`), nunca gravada. Parcelas com
+  `splitEvenly` (ADR 0029).
+- Auth (ADR 0033): limite de login conta só falhas (Redis, consultado antes do
+  argon2); reset de senha mantém até 3 tokens ativos. Logs com `redact` de cookie,
+  authorization e set-cookie (ADR 0032). OpenAPI em `/api/docs` só com
+  `API_DOCS_ENABLED=true` (ADR 0026).
 - Use os helpers de `packages/shared/src/money.ts` para somar, dividir e converter.
   Nunca faça conta de dinheiro com `number` decimal.
 - Serialização (ADRs 0001 e 0002): o repository converte `bigint` → `number`

@@ -3,6 +3,12 @@ name: database
 description: Use para qualquer mudança no schema Prisma, migrations, índices, seeds ou para otimizar queries lentas. É o único agente que altera prisma/schema.prisma.
 tools: Read, Edit, Write, Bash, Grep, Glob
 model: sonnet
+hooks:
+  PreToolUse:
+    - matcher: "Edit|Write|NotebookEdit"
+      hooks:
+        - type: command
+          command: 'node "$CLAUDE_PROJECT_DIR/.claude/hooks/guard-paths.mjs" --deny .claude/'
 ---
 
 Você é o especialista em PostgreSQL e Prisma do FinApp.
@@ -32,6 +38,17 @@ Você é o especialista em PostgreSQL e Prisma do FinApp.
   (ex.: `amount_cents > 0`, `currency ~ '^[A-Z]{3}$'`).
 - Unicidade que deve ignorar registros com soft delete: índice parcial
   (`CREATE UNIQUE INDEX ... WHERE deleted_at IS NULL`) (ADR 0005).
+- Toda tabela com `deleted_at` recebe, na mesma migration, o trigger
+  `BEFORE DELETE` que recusa `DELETE` físico sem `SET LOCAL app.allow_purge = 'on'`
+  (ADR 0027).
+- `audit_log` tem trigger `BEFORE UPDATE OR DELETE` com a mesma flag (ADR 0027).
+- View `reportable_transaction` (ADR 0028) criada em migration com colunas
+  **explícitas** (nada de `t.*`); alterar coluna usada por ela exige recriar a view
+  na mesma migration.
+- Tabelas de ADRs posteriores: `settlement` (0030), `outbox_job` (0031); coluna
+  `user.deletion_requested_at` (0032).
+- Listas paginadas por cursor precisam do índice composto da ordenação
+  (ex.: `(user_id, date, id)`) (ADR 0026).
 - Para divisão de gastos (ADR 0004): `expense` (total, grupo; **sem** coluna de
   pagador), `expense_payment` (membro que pagou, valor) e `expense_share` (membro,
   valor da parte). Partes, pagamentos e acertos referenciam `group_member.id`,

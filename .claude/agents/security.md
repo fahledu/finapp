@@ -22,7 +22,11 @@ financeiros e pessoais, então está sujeito à LGPD e é alvo atraente.
   produção `secure` e nome `__Host-sid`. Token guardado só como SHA-256
 - Rotação de sessão no login; invalidação no logout, troca e reset de senha
 - Rate limit, e-mail normalizado, parâmetros do argon2id e resposta sem revelar
-  se a conta existe, conforme ADR 0007
+  se a conta existe, conforme ADR 0007; login conta só falhas e reset mantém até
+  3 tokens ativos (ADR 0033)
+- Token em claro só no payload do outbox de e-mail, com linha apagada ao
+  enfileirar e `removeOnComplete` (ADR 0031)
+- OpenAPI desligado em produção (`API_DOCS_ENABLED`, ADR 0026)
 - Tokens de uso único (reset, verificação, convite) só como hash, com validade e
   `used_at` (ADRs 0008 e 0014)
 - Proteção CSRF nas mutações
@@ -47,7 +51,8 @@ financeiros e pessoais, então está sujeito à LGPD e é alvo atraente.
 
 **Dados e segredos**
 - Segredos só em variáveis de ambiente, nunca commitados; `.env` no `.gitignore`
-- Logs sem dados sensíveis
+- Logs sem dados sensíveis: `redact` de cookie/authorization/set-cookie, sem
+  corpo, e-mail ou token; retenção de logs e backups conforme ADR 0032
 - LGPD: existe forma de exportar e excluir os dados do usuário? O expurgo segue o
   ADR 0010, e snapshots de `audit_log` não guardam dado pessoal (ADR 0005)
 

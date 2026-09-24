@@ -12,6 +12,7 @@ for resolvida. Questão resolvida sai daqui e vai para um ADR ou plano.
 ## Feito
 
 - ADRs 0001–0021 aceitos e consolidados (linha de base de 2026-09-24, ver `docs/adr/README.md`).
+- ADR 0024: limites de valores monetários e decimais.
 - Agentes e hooks de área em `.claude/`.
 
 ## Pendências de ferramenta (hooks e agentes)
@@ -36,10 +37,6 @@ planejar a feature indicada.
 
 **Antes do item 1** (afetam `packages/shared` e a primeira migration)
 
-- [ ] **Teto de valores.** `amountCents` só é limitado pelo inteiro seguro; somas
-      de valores enormes estouram na conversão (500). `decimalStringSchema` aceita
-      mais de 12 dígitos inteiros, que o `NUMERIC(20,8)` recusa (500). Definir
-      máximo por operação e limitar a regex.
 - [ ] **Transação atravessando camadas.** Idempotência (plugin), operação e
       `audit_log` precisam da mesma `$transaction`. Escolher: passar `tx`
       explicitamente ou `AsyncLocalStorage`.

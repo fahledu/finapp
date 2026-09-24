@@ -1,6 +1,6 @@
 # 0001. Representação de dinheiro, decimais e porcentagens
 
-- Status: Aceito
+- Status: Aceito (complementado por [0024](0024-limites-de-valores.md))
 - Data: 2026-09-23
 
 ## Contexto

@@ -18,7 +18,7 @@ Foi uma exceção única; a partir daqui, a imutabilidade acima vale sem exceç�
 
 | # | Título | Status |
 |---|---|---|
-| [0001](0001-representacao-de-dinheiro.md) | Representação de dinheiro, decimais e porcentagens | Aceito |
+| [0001](0001-representacao-de-dinheiro.md) | Representação de dinheiro, decimais e porcentagens | Aceito, complementado por 0024 |
 | [0002](0002-datas-e-fusos.md) | Datas, instantes e fuso horário | Aceito |
 | [0003](0003-moedas.md) | Suporte a moedas na V1 | Aceito |
 | [0004](0004-despesas-de-grupo.md) | Despesas de grupo: divisão, pagadores e saldos | Aceito |
@@ -34,10 +34,11 @@ Foi uma exceção única; a partir daqui, a imutabilidade acima vale sem exceç�
 | [0019](0019-transferencias-entre-contas.md) | Transferências entre contas | Aceito |
 | [0020](0020-cartao-de-credito-e-parcelamento.md) | Cartão de crédito e compras parceladas | Aceito |
 | [0021](0021-saldo-inicial-e-categorias.md) | Saldo inicial de conta e categorias padrão | Aceito |
+| [0024](0024-limites-de-valores.md) | Limites de valores monetários e decimais | Aceito |
 
 **Números aposentados** (incorporados na consolidação; nunca reutilize):
 0009 e 0022 → 0004 · 0012 → 0005 · 0016 → 0006 · 0015 → 0007 · 0023 → 0008 ·
-0017 → 0010. O próximo ADR novo é o **0024**. O conteúdo antigo está no histórico
+0017 → 0010. O próximo ADR novo é o **0025**. O conteúdo antigo está no histórico
 do git.
 
 ## Decisões ainda sem ADR
@@ -49,7 +50,8 @@ e pontos cegos conhecidos estão em [`docs/STATUS.md`](../STATUS.md).
   dívida, acerto com membro sem conta, quem registra, desempate determinístico da
   simplificação.
 - **Investimentos (roadmap 10):** eventos societários (desdobramento, grupamento,
-  bonificação), proventos (dividendos, JCP) e método de preço médio.
+  bonificação), proventos (dividendos, JCP), método de preço médio e valor
+  derivado que arredonda para 0 centavo (ver 0024).
 - **Orçamentos (roadmap 9):** moeda do orçamento e se a parte em despesas de grupo
   conta (ver 0018).
 - **Recorrências (roadmap 12):** idempotência do job (não gerar a mesma ocorrência

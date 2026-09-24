@@ -92,9 +92,11 @@ plano e pede decisão antes de implementar.
    `number` inteiro seguro no código e no JSON (`{ amountCents, currency }`).
    Conversão `bigint` ↔ `number` só no repository. Direção (entrada/saída) vem de
    um campo `type`, não do sinal. Porcentagens em pontos-base (`10000` = 100%).
-   Use os helpers de `packages/shared/src/money.ts`. (ADR 0001)
+   Teto por operação: `MAX_AMOUNT_CENTS` (R$ 100 milhões), validado na borda.
+   Use os helpers de `packages/shared/src/money.ts`. (ADRs 0001 e 0024)
 2. **Quantidades e preços unitários de investimento** usam `NUMERIC(20,8)` e
-   `Prisma.Decimal`, nunca `number`; no JSON trafegam como string (`"12.5"`).
+   `Prisma.Decimal`, nunca `number`; no JSON trafegam como string (`"12.5"`,
+   até 12 dígitos inteiros e 8 decimais, ADR 0024).
    É a única exceção à regra dos centavos; o valor derivado vira centavos uma vez,
    no fim, com `ROUND_HALF_UP`. (ADR 0001)
 3. **Divisão de gastos:** a soma das partes deve ser exatamente igual ao total.
